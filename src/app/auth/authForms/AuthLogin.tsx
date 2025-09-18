@@ -78,7 +78,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             variant="outlined" 
             fullWidth 
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e:any) => setUsername(e.target.value)}
           />
         </Box>
         <Box>
@@ -89,7 +89,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             variant="outlined"
             fullWidth
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e:any) => setPassword(e.target.value)}
           />
         </Box>
       <Stack
@@ -135,3 +135,4 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 };
 
 export default AuthLogin;
+
