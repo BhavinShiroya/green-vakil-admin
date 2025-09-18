@@ -30,7 +30,7 @@ const ProductPerformance = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const baseUrl = "http://toc08o4sw0ks0wo8wwgs8skg.91.98.76.2.sslip.io";
+  const baseUrl = "https://fronterainfotech.com";
 
   useEffect(() => {
     const fetchContacts = async () => {
