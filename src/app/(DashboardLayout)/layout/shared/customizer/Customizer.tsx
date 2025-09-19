@@ -1,14 +1,14 @@
 import { FC, useState, useContext } from "react";
-import Divider from '@mui/material/Divider'
-import Drawer from '@mui/material/Drawer'
-import Fab from '@mui/material/Fab'
-import Grid from '@mui/material/Grid'
-import IconButton from '@mui/material/IconButton'
-import Slider from '@mui/material/Slider'
-import Stack from '@mui/material/Stack'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
-import { styled } from '@mui/material/styles'
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import Fab from "@mui/material/Fab";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import Slider from "@mui/material/Slider";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
 import { CustomizerContext } from "@/app/context/customizerContext";
 import Box, { BoxProps } from "@mui/material/Box";
 import { IconX, IconSettings, IconCheck } from "@tabler/icons-react";
@@ -51,9 +51,8 @@ const Customizer: FC = () => {
     setIsLayout,
     isBorderRadius,
     setIsBorderRadius,
-    setActiveTheme
+    setActiveTheme,
   } = useContext(CustomizerContext);
-
 
   const StyledBox = styled(Box)<BoxProps>(({ theme }) => ({
     boxShadow: theme.shadows[8],
@@ -105,15 +104,12 @@ const Customizer: FC = () => {
     },
   ];
 
-
-
-
   return (
     <div>
       {/* ------------------------------------------- */}
       {/* --Floating Button to open customizer ------ */}
       {/* ------------------------------------------- */}
-      <Tooltip title="Settings">
+      {/* <Tooltip title="Settings">
         <Fab
           color="primary"
           aria-label="settings"
@@ -122,7 +118,7 @@ const Customizer: FC = () => {
         >
           <IconSettings stroke={1.5} />
         </Fab>
-      </Tooltip>
+      </Tooltip> */}
       <Drawer
         anchor="right"
         open={showDrawer}
@@ -132,7 +128,7 @@ const Customizer: FC = () => {
             sx: {
               width: SidebarWidth,
             },
-          }
+          },
         }}
       >
         {/* ------------------------------------------- */}
@@ -166,9 +162,7 @@ const Customizer: FC = () => {
                 gap={1}
               >
                 <WbSunnyTwoToneIcon
-                  color={
-                    activeMode === "light" ? "primary" : "inherit"
-                  }
+                  color={activeMode === "light" ? "primary" : "inherit"}
                 />
                 Light
               </StyledBox>
@@ -178,9 +172,7 @@ const Customizer: FC = () => {
                 gap={1}
               >
                 <DarkModeTwoToneIcon
-                  color={
-                    activeMode === "dark" ? "primary" : "inherit"
-                  }
+                  color={activeMode === "dark" ? "primary" : "inherit"}
                 />
                 Dark
               </StyledBox>
@@ -250,8 +242,6 @@ const Customizer: FC = () => {
                       </Box>
                     </Tooltip>
                   </StyledBox>
-
-
                 </Grid>
               ))}
             </Grid>
@@ -269,9 +259,7 @@ const Customizer: FC = () => {
                 gap={1}
               >
                 <ViewComfyTwoTone
-                  color={
-                    activeLayout === 'vertical' ? "primary" : "inherit"
-                  }
+                  color={activeLayout === "vertical" ? "primary" : "inherit"}
                 />
                 Vertical
               </StyledBox>
@@ -281,9 +269,7 @@ const Customizer: FC = () => {
                 gap={1}
               >
                 <PaddingTwoTone
-                  color={
-                    activeLayout === 'horizontal' ? "primary" : "inherit"
-                  }
+                  color={activeLayout === "horizontal" ? "primary" : "inherit"}
                 />
                 Horizontal
               </StyledBox>
@@ -302,9 +288,7 @@ const Customizer: FC = () => {
                 gap={1}
               >
                 <CallToActionTwoToneIcon
-                  color={
-                    isLayout === "boxed" ? "primary" : "inherit"
-                  }
+                  color={isLayout === "boxed" ? "primary" : "inherit"}
                 />
                 Boxed
               </StyledBox>
@@ -337,13 +321,15 @@ const Customizer: FC = () => {
                 <Stack direction={"row"} gap={2} my={2}>
                   <StyledBox
                     onClick={() => {
-                      setIsCollapse('full-sidebar')
+                      setIsCollapse("full-sidebar");
                     }}
                     display="flex"
                     gap={1}
                   >
                     <WebAssetTwoToneIcon
-                      color={isCollapse === "full-sidebar" ? "primary" : "inherit"}
+                      color={
+                        isCollapse === "full-sidebar" ? "primary" : "inherit"
+                      }
                     />
                     Full
                   </StyledBox>
@@ -353,7 +339,9 @@ const Customizer: FC = () => {
                     gap={1}
                   >
                     <ViewSidebarTwoToneIcon
-                      color={isCollapse === "mini-sidebar" ? "primary" : "inherit"}
+                      color={
+                        isCollapse === "mini-sidebar" ? "primary" : "inherit"
+                      }
                     />
                     mini
                   </StyledBox>
@@ -370,9 +358,7 @@ const Customizer: FC = () => {
                 display="flex"
                 gap={1}
               >
-                <BorderOuter
-                  color={!isCardShadow ? "primary" : "inherit"}
-                />
+                <BorderOuter color={!isCardShadow ? "primary" : "inherit"} />
                 Border
               </StyledBox>
               <StyledBox

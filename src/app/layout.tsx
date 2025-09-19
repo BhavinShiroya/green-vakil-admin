@@ -1,14 +1,13 @@
 import React from "react";
 import MyApp from "./app";
-import NextTopLoader from 'nextjs-toploader';
+import NextTopLoader from "nextjs-toploader";
 import "./global.css";
 import { CustomizerContextProvider } from "./context/customizerContext";
 import { AuthProvider } from "./context/authContext";
 
-
 export const metadata = {
-  title: "Modernize Main Demo",
-  description: "Modernize Main kit",
+  title: "Greenway Lawyer",
+  description: "Greenway Lawyer",
 };
 
 export default function RootLayout({
