@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import Menu from '@mui/material/Menu';
-import Typography from '@mui/material/Typography';
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Menu from "@mui/material/Menu";
+import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import { IconChevronDown, IconHelp } from "@tabler/icons-react";
 import AppLinks from "./AppLinks";
@@ -23,7 +23,7 @@ const AppDD = () => {
 
   return (
     <>
-      <Box>
+      {/* <Box>
         <Button
           aria-label="show 11 new notifications"
           color="inherit"
@@ -46,9 +46,7 @@ const AppDD = () => {
         >
           Apps
         </Button>
-        {/* ------------------------------------------- */}
-        {/* Message Dropdown */}
-        {/* ------------------------------------------- */}
+
         <Menu
           id="msgs-menu"
           anchorEl={anchorEl2}
@@ -70,8 +68,9 @@ const AppDD = () => {
             <Grid
               display="flex"
               size={{
-                sm: 8
-              }}>
+                sm: 8,
+              }}
+            >
               <Box p={4} pr={0} pb={3}>
                 <AppLinks />
                 <Divider />
@@ -109,8 +108,9 @@ const AppDD = () => {
             </Grid>
             <Grid
               size={{
-                sm: 4
-              }}>
+                sm: 4,
+              }}
+            >
               <Box p={4}>
                 <QuickLinks />
               </Box>
@@ -144,7 +144,7 @@ const AppDD = () => {
         component={Link}
       >
         Email
-      </Button>
+      </Button> */}
     </>
   );
 };
