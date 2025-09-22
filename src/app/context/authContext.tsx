@@ -65,7 +65,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
         Cookies.remove("userData");
+        setIsAuthenticated(false);
       }
+    } else {
+      setIsAuthenticated(false);
+      console.log("❌ No valid tokens - user not authenticated");
     }
     setLoading(false);
   }, []);
@@ -108,12 +112,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // Store tokens in cookies
         if (tokens?.access?.token) {
-          // Set access token with expiry
-          const accessExpiry = tokens.access.expires
-            ? new Date(tokens.access.expires)
-            : 1; // 1 day default
+          // Set access token cookie to expire in 1 day (longer than JWT expiry)
+          // This allows the cookie to persist while the JWT inside expires and gets refreshed
           Cookies.set("accessToken", tokens.access.token, {
-            expires: accessExpiry,
+            expires: 1, // 1 day - cookie lives longer than JWT token
           });
         }
 
@@ -150,12 +152,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    // Remove all authentication cookies
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
-    Cookies.remove("userData");
+    // setIsAuthenticated(false);
+    // setUser(null);
+    // // Remove all authentication cookies
+    // Cookies.remove("accessToken");
+    // Cookies.remove("refreshToken");
+    // Cookies.remove("userData");
   };
 
   const value: AuthContextType = {
