@@ -113,7 +113,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             alignItems="center"
             my={2}
           >
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={<CustomCheckbox defaultChecked />}
                 label="Remeber this Device"
@@ -129,7 +129,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
               }}
             >
               Forgot Password ?
-            </Typography>
+            </Typography> */}
           </Stack>
         </Stack>
         <Box>
