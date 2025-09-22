@@ -1,17 +1,34 @@
+"use client";
+
+import * as React from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Typography,
+  TableHead,
+  Avatar,
+  Chip,
   Box,
   Table,
   TableBody,
   TableCell,
-  TableHead,
+  TablePagination,
   TableRow,
-  Chip,
+  TableFooter,
+  IconButton,
+  TableContainer,
   CircularProgress,
 } from "@mui/material";
+
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import LastPageIcon from "@mui/icons-material/LastPage";
+
+import ParentCard from "@/app/components/shared/ParentCard";
+import { Stack } from "@mui/system";
+import BlankCard from "@/app/components/shared/BlankCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import DashboardCard from "@/app/components/shared/DashboardCard";
 
 // Define the contact interface based on the actual API response
 interface Contact {
@@ -26,132 +43,228 @@ interface Contact {
   message: string;
 }
 
+interface TablePaginationActionsProps {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onPageChange: (
+    event: React.MouseEvent<HTMLButtonElement>,
+    newPage: number
+  ) => void;
+}
+
+function TablePaginationActions(props: TablePaginationActionsProps) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowRight />
+        ) : (
+          <KeyboardArrowLeft />
+        )}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowLeft />
+        ) : (
+          <KeyboardArrowRight />
+        )}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
+  );
+}
+
 const ProductPerformance = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalContacts, setTotalContacts] = useState(0);
 
   const baseUrl = "https://fronterainfotech.com";
 
+  const fetchContacts = async (currentPage: number, limit: number) => {
+    try {
+      setLoading(true);
+
+      const response = await axios.get(`${baseUrl}/v1/contacts`, {
+        params: {
+          sortBy: "firstName:asc",
+          limit: limit,
+          page: currentPage + 1, // API is 1-indexed, MUI pagination is 0-indexed
+        },
+      });
+
+      setContacts(response.data.results || []);
+      setTotalContacts(response.data.totalResults || 0);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      setContacts([]);
+      setTotalContacts(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchContacts = async () => {
-      try {
-        setLoading(true);
+    fetchContacts(page, rowsPerPage);
+  }, [page, rowsPerPage]);
 
-        const response = await axios.get(`${baseUrl}/v1/contacts`, {
-          params: {
-            sortBy: "firstName:asc",
-            limit: 100,
-            page: 1,
-          },
-        });
+  const handleChangePage = (
+    event: any,
+    newPage: React.SetStateAction<number>
+  ) => {
+    setPage(newPage);
+  };
 
-        console.log("API Response:", response.data);
-        setContacts(response.data.results);
-      } catch (error) {
-        console.error("Error fetching contacts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleChangeRowsPerPage = (event: { target: { value: string } }) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0); // Reset to first page when changing rows per page
+  };
 
-    fetchContacts();
-  }, []);
+  // Generate a random avatar for contacts
+  const getRandomAvatar = (index: number) => {
+    const avatarIndex = (index % 10) + 1;
+    return `/images/profile/user-${avatarIndex}.jpg`;
+  };
+
+  // Get status color based on legal service
+  const getServiceChipColor = (service: string) => {
+    const lowerService = service.toLowerCase();
+    if (lowerService.includes("immigration")) return "primary";
+    if (lowerService.includes("business")) return "success";
+    if (lowerService.includes("family")) return "warning";
+    if (lowerService.includes("criminal")) return "error";
+    return "default";
+  };
 
   return (
-    <DashboardCard title="Contacts Management">
-      <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
+    <ParentCard title="Contacts Management">
+      <BlankCard>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
             <CircularProgress />
           </Box>
         ) : (
-          <Table
-            aria-label="simple table"
-            sx={{
-              whiteSpace: "nowrap",
-              mt: 2,
-            }}
-          >
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Name
-                  </Typography>
-                </TableCell>
-
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Legal Services
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Email
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Phone
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    State
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    City
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Message
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {contacts &&
-                contacts.map((contact) => (
+          <TableContainer sx={{ maxWidth: "100%", overflow: "hidden" }}>
+            <Table
+              aria-label="contacts pagination table"
+              sx={{
+                tableLayout: "fixed",
+                width: "100%",
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: "16%" }}>
+                    <Typography variant="h6">Name</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "18%" }}>
+                    <Typography variant="h6">Legal Service</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "17%" }}>
+                    <Typography variant="h6">Email</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "15%" }}>
+                    <Typography variant="h6">Phone</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "14%" }}>
+                    <Typography variant="h6">Location</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "20%" }}>
+                    <Typography variant="h6">Message</Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {contacts.map((contact, index) => (
                   <TableRow key={contact.id}>
                     <TableCell>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar
+                          src={getRandomAvatar(index)}
+                          alt={`${contact.firstName} ${contact.lastName}`}
+                        />
                         <Box>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            {contact.firstName}
-                          </Typography>
-                          <Typography
-                            color="textSecondary"
-                            sx={{
-                              fontSize: "13px",
-                            }}
-                          >
-                            {contact.lastName}
+                          <Typography variant="subtitle2" fontWeight="600">
+                            {contact.firstName} {contact.lastName}
                           </Typography>
                         </Box>
-                      </Box>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        color={getServiceChipColor(contact.legalService)}
+                        sx={{
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                        }}
+                        size="small"
+                        label={contact.legalService}
+                      />
                     </TableCell>
                     <TableCell>
                       <Typography
                         color="textSecondary"
                         variant="subtitle2"
-                        fontWeight={400}
-                      >
-                        {contact.legalService}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight={400}
+                        fontWeight="400"
+                        sx={{
+                          overflow: "hidden",
+                          // textOverflow: "ellipsis",
+                          // whiteSpace: "nowrap",
+                          cursor: "pointer",
+                        }}
+                        title={contact.email}
                       >
                         {contact.email}
                       </Typography>
@@ -160,7 +273,14 @@ const ProductPerformance = () => {
                       <Typography
                         color="textSecondary"
                         variant="subtitle2"
-                        fontWeight={400}
+                        fontWeight="400"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          cursor: "pointer",
+                        }}
+                        title={contact.phoneNumber}
                       >
                         {contact.phoneNumber}
                       </Typography>
@@ -169,36 +289,74 @@ const ProductPerformance = () => {
                       <Typography
                         color="textSecondary"
                         variant="subtitle2"
-                        fontWeight={400}
-                      >
-                        {contact.state}
-                      </Typography>
-                    </TableCell>{" "}
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight={400}
+                        fontWeight="400"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                        title={`${contact.city}, ${contact.state}`}
                       >
                         {contact.city}
                       </Typography>
-                    </TableCell>{" "}
+                      <Typography
+                        color="textSecondary"
+                        variant="subtitle2"
+                        fontWeight="400"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          cursor: "pointer",
+                        }}
+                        title={`${contact.city}, ${contact.state}`}
+                      >
+                        {contact.state}
+                      </Typography>
+                    </TableCell>
                     <TableCell>
                       <Typography
                         color="textSecondary"
                         variant="subtitle2"
-                        fontWeight={400}
+                        fontWeight="400"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          // whiteSpace: "nowrap",
+                          cursor: "pointer",
+                        }}
+                        title={contact.message} // Show full message on hover
                       >
                         {contact.message}
                       </Typography>
                     </TableCell>
                   </TableRow>
                 ))}
-            </TableBody>
-          </Table>
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    colSpan={6}
+                    count={totalContacts}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    ActionsComponent={TablePaginationActions}
+                    slotProps={{
+                      select: {
+                        native: true,
+                      },
+                    }}
+                  />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </TableContainer>
         )}
-      </Box>
-    </DashboardCard>
+      </BlankCard>
+    </ParentCard>
   );
 };
 
