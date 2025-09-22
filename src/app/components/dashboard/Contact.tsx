@@ -28,7 +28,7 @@ import ParentCard from "@/app/components/shared/ParentCard";
 import { Stack } from "@mui/system";
 import BlankCard from "@/app/components/shared/BlankCard";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import apiClient from "@/utils/axios";
 
 // Define the contact interface based on the actual API response
 interface Contact {
@@ -123,20 +123,18 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   );
 }
 
-const ProductPerformance = () => {
+const Contact = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalContacts, setTotalContacts] = useState(0);
 
-  const baseUrl = "https://fronterainfotech.com";
-
   const fetchContacts = async (currentPage: number, limit: number) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${baseUrl}/v1/contacts`, {
+      const response = await apiClient.get("/contacts", {
         params: {
           sortBy: "firstName:asc",
           limit: limit,
@@ -360,4 +358,4 @@ const ProductPerformance = () => {
   );
 };
 
-export default ProductPerformance;
+export default Contact;

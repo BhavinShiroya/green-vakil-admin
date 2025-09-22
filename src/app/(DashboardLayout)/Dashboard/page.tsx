@@ -10,18 +10,18 @@ const BCrumb = [
     title: "Home",
   },
   {
-    title: "SamplePage",
+    title: "Dashboard",
   },
 ];
 
-export default function SamplePage() {
+export default function Dashboard() {
   return (
-    <PageContainer title="Sample Page" description="this is Sample page">
+    <PageContainer title="Dashboard" description="this is Dashboard page">
       {/* breadcrumb */}
-      <Breadcrumb title="SamplePage" items={BCrumb} />
+      <Breadcrumb title="Dashboard" items={BCrumb} />
       {/* end breadcrumb */}
-      <DashboardCard title="Sample Page">
-        <Typography>This is a sample2 page</Typography>
+      <DashboardCard title="Dashboard">
+        <Typography>This is a dashboard page</Typography>
       </DashboardCard>
     </PageContainer>
   );
