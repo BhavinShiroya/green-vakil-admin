@@ -187,7 +187,32 @@ const Contact = () => {
   };
 
   return (
-    <ParentCard title="Contacts Management">
+    // <ParentCard title="Contacts Management">
+    <>
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+        <Box
+          sx={{
+            width: 4,
+            height: 40,
+            backgroundColor: "primary.main",
+            borderRadius: 1,
+          }}
+        />
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color: "text.primary",
+              mb: 0.5,
+              letterSpacing: "-0.025em",
+            }}
+          >
+            Contact Management
+          </Typography>
+          
+        </Box>
+      </Box>
       <BlankCard>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
@@ -354,7 +379,8 @@ const Contact = () => {
           </TableContainer>
         )}
       </BlankCard>
-    </ParentCard>
+      {/* </ParentCard> */}
+    </>
   );
 };
 
