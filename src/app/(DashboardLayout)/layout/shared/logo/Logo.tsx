@@ -22,7 +22,7 @@ const Logo = () => {
 
   if (activeDir === "ltr") {
     return (
-      <LinkStyled href="/Dashboard">
+      <LinkStyled href="/dashboard">
         {activeMode === "dark" ? (
           <Image
             src="/images/logos/light-logo.svg"

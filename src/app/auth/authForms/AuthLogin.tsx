@@ -42,7 +42,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         setError(result.error || "Login failed");
       } else {
         // Successful login - redirect to dashboard
-        router.push("/Dashboard");
+        router.push("/dashboard");
       }
     } catch (error) {
       setError("An unexpected error occurred");
