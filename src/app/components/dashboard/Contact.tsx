@@ -17,6 +17,7 @@ import {
   IconButton,
   TableContainer,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -210,7 +211,6 @@ const Contact = () => {
           >
             Contact Management
           </Typography>
-          
         </Box>
       </Box>
       <BlankCard>
@@ -253,105 +253,130 @@ const Contact = () => {
                 {contacts.map((contact, index) => (
                   <TableRow key={contact.id}>
                     <TableCell>
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <Avatar
-                          src={getRandomAvatar(index)}
-                          alt={`${contact.firstName} ${contact.lastName}`}
+                      <Tooltip
+                        title={`${contact.firstName} ${contact.lastName}`}
+                        arrow
+                        placement="top"
+                      >
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Avatar
+                            src={getRandomAvatar(index)}
+                            alt={`${contact.firstName} ${contact.lastName}`}
+                          />
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight="400">
+                              {contact.firstName} {contact.lastName}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        title={`${contact.legalService}`}
+                        arrow
+                        placement="top"
+                      >
+                        <Chip
+                          color={getServiceChipColor(contact.legalService)}
+                          sx={{
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                          size="small"
+                          label={contact.legalService}
                         />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title={contact.email} arrow placement="top">
+                        <Typography
+                          color="textSecondary"
+                          variant="subtitle2"
+                          fontWeight="400"
+                          sx={{
+                            overflow: "hidden",
+                            // textOverflow: "ellipsis",
+                            // whiteSpace: "nowrap",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {contact.email}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        title={contact.phoneNumber}
+                        arrow
+                        placement="top"
+                      >
+                        <Typography
+                          color="textSecondary"
+                          variant="subtitle2"
+                          fontWeight="400"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {contact.phoneNumber}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        title={`${contact.city}, ${contact.state}`}
+                        arrow
+                        placement="top"
+                      >
                         <Box>
-                          <Typography variant="subtitle2" fontWeight="600">
-                            {contact.firstName} {contact.lastName}
+                          <Typography
+                            color="textSecondary"
+                            variant="subtitle2"
+                            fontWeight="400"
+                            sx={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {contact.city}
+                          </Typography>
+                          <Typography
+                            color="textSecondary"
+                            variant="subtitle2"
+                            fontWeight="400"
+                            sx={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {contact.state}
                           </Typography>
                         </Box>
-                      </Stack>
+                      </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        color={getServiceChipColor(contact.legalService)}
-                        sx={{
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                        }}
-                        size="small"
-                        label={contact.legalService}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight="400"
-                        sx={{
-                          overflow: "hidden",
-                          // textOverflow: "ellipsis",
-                          // whiteSpace: "nowrap",
-                          cursor: "pointer",
-                        }}
-                        title={contact.email}
-                      >
-                        {contact.email}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight="400"
-                        sx={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          cursor: "pointer",
-                        }}
-                        title={contact.phoneNumber}
-                      >
-                        {contact.phoneNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight="400"
-                        sx={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                        title={`${contact.city}, ${contact.state}`}
-                      >
-                        {contact.city}
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight="400"
-                        sx={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          cursor: "pointer",
-                        }}
-                        title={`${contact.city}, ${contact.state}`}
-                      >
-                        {contact.state}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        color="textSecondary"
-                        variant="subtitle2"
-                        fontWeight="400"
-                        sx={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          // whiteSpace: "nowrap",
-                          cursor: "pointer",
-                        }}
-                        title={contact.message} // Show full message on hover
-                      >
-                        {contact.message}
-                      </Typography>
+                      <Tooltip title={contact.message} arrow placement="top">
+                        <Typography
+                          color="textSecondary"
+                          variant="subtitle2"
+                          fontWeight="400"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            // whiteSpace: "nowrap",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {contact.message}
+                        </Typography>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
