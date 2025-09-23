@@ -33,10 +33,10 @@ const Logo = () => {
           />
         ) : (
           <Image
-            src={"/images/logos/dark-logo.svg"}
+            src={"/images/logos/Greenway.logo.svg"}
             alt="logo"
             height={TopbarHeight}
-            width={174}
+            width={180}
             priority
           />
         )}

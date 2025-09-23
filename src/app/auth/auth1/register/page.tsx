@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import PageContainer from "@/app/components/container/PageContainer";
 import Logo from "@/app/(DashboardLayout)/layout/shared/logo/Logo";
 
@@ -36,8 +36,9 @@ export default function Register() {
             xs: 12,
             sm: 12,
             lg: 7,
-            xl: 8
-          }}>
+            xl: 8,
+          }}
+        >
           <Box position="relative">
             <Box px={3}>
               <Logo />
@@ -55,10 +56,13 @@ export default function Register() {
             >
               <Image
                 src={"/images/backgrounds/login-bg.svg"}
-                alt="bg" width={500} height={500}
+                alt="bg"
+                width={500}
+                height={500}
                 style={{
                   width: "100%",
-                  maxWidth: "500px",  maxHeight: '500px',
+                  maxWidth: "500px",
+                  maxHeight: "500px",
                 }}
               />
             </Box>
@@ -72,11 +76,12 @@ export default function Register() {
             xs: 12,
             sm: 12,
             lg: 5,
-            xl: 4
-          }}>
+            xl: 4,
+          }}
+        >
           <Box p={4}>
             <AuthRegister
-              title="Welcome to Modernize"
+              title="Welcome to Greenway Lawyer"
               subtext={
                 <Typography variant="subtitle1" color="textSecondary" mb={1}>
                   Your Admin Dashboard
@@ -84,7 +89,11 @@ export default function Register() {
               }
               subtitle={
                 <Stack direction="row" spacing={1} mt={3}>
-                  <Typography color="textSecondary" variant="h6" fontWeight="400">
+                  <Typography
+                    color="textSecondary"
+                    variant="h6"
+                    fontWeight="400"
+                  >
                     Already have an Account?
                   </Typography>
                   <Typography
@@ -105,5 +114,5 @@ export default function Register() {
         </Grid>
       </Grid>
     </PageContainer>
-  );};
-
+  );
+}
