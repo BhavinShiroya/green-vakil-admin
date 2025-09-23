@@ -128,7 +128,7 @@ const Contact = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalContacts, setTotalContacts] = useState(0);
 
   const fetchContacts = async (currentPage: number, limit: number) => {
