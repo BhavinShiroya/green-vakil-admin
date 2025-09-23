@@ -24,7 +24,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
@@ -151,13 +151,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const logout = () => {
-    // setIsAuthenticated(false);
-    // setUser(null);
-    // // Remove all authentication cookies
-    // Cookies.remove("accessToken");
-    // Cookies.remove("refreshToken");
-    // Cookies.remove("userData");
+  const logout = async () => {
+    try {
+      const accessToken = Cookies.get("acc2essToken");
+      const refreshToken = Cookies.get("refreshToken");
+
+      if (accessToken && refreshToken) {
+        console.log("🔄 Calling logout API...");
+
+        // Call logout API
+        await axios.post(
+          "https://fronterainfotech.com/v1/auth/logout",
+          { refreshToken },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        console.log("✅ Logout API call successful");
+      }
+    } catch (error) {
+      console.error("❌ Logout API call failed:", error);
+      // Continue with logout even if API fails
+    } finally {
+      // Always clear local state and cookies
+      setIsAuthenticated(false);
+      setUser(null);
+      // Remove all authentication cookies
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      Cookies.remove("userData");
+      console.log("✅ User logged out and tokens cleared");
+    }
   };
 
   const value: AuthContextType = {
