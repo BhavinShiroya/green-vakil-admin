@@ -202,7 +202,7 @@ const Contact = () => {
           <Typography
             variant="h4"
             sx={{
-              fontWeight: 700,
+              fontWeight: 600,
               color: "text.primary",
               mb: 0.5,
               letterSpacing: "-0.025em",
