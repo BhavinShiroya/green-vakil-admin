@@ -42,6 +42,7 @@ interface Contact {
   state: string;
   city: string;
   message: string;
+  createdAt: string;
 }
 
 interface TablePaginationActionsProps {
@@ -187,6 +188,18 @@ const Contact = () => {
     return "default";
   };
 
+  // Format date and time
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
   return (
     // <ParentCard title="Contacts Management">
     <>
@@ -229,23 +242,26 @@ const Contact = () => {
             >
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: "16%" }}>
+                  <TableCell sx={{ width: "15%" }}>
                     <Typography variant="h6">Name</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "18%" }}>
+                  <TableCell sx={{ width: "13%" }}>
                     <Typography variant="h6">Legal Service</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "17%" }}>
+                  <TableCell sx={{ width: "15%" }}>
                     <Typography variant="h6">Email</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "15%" }}>
+                  <TableCell sx={{ width: "13%" }}>
                     <Typography variant="h6">Phone</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "14%" }}>
+                  <TableCell sx={{ width: "12%" }}>
                     <Typography variant="h6">Location</Typography>
                   </TableCell>
                   <TableCell sx={{ width: "20%" }}>
                     <Typography variant="h6">Message</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "12%" }}>
+                    <Typography variant="h6">Date / time</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -377,6 +393,11 @@ const Contact = () => {
                           {contact.message}
                         </Typography>
                       </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="subtitle2" fontWeight="400">
+                        {formatDate(contact.createdAt)}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 ))}
