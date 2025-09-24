@@ -79,13 +79,21 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: "Contact",
-    icon: IconMoodSmile,
+    title: "Clients",
+    icon: IconAward,
     href: "/contact",
     // chip: "New",
     chipColor: "secondary",
   },
 
+  {
+    id: uniqueId(),
+    title: "Users",
+    icon: IconMoodSmile,
+    href: "/users",
+    // chip: "New",
+    chipColor: "secondary",
+  },
   // {
   //   navlabel: true,
   //   subheader: "Other",
