@@ -205,14 +205,6 @@ const Contact = () => {
     // <ParentCard title="Contacts Management">
     <>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
-        <Box
-          sx={{
-            width: 4,
-            height: 40,
-            backgroundColor: "primary.main",
-            borderRadius: 1,
-          }}
-        />
         <Box>
           <Typography
             variant="h4"
