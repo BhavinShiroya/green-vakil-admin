@@ -138,9 +138,10 @@ const Contact = () => {
 
       const response = await apiClient.get("/contacts", {
         params: {
-          sortBy: "firstName:asc",
+          sortBy: "createdAt:desc",
           limit: limit,
           page: currentPage + 1, // API is 1-indexed, MUI pagination is 0-indexed
+          // createdAt: "desc",
         },
       });
 
