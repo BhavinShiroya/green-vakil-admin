@@ -222,7 +222,7 @@ const Contact = () => {
               letterSpacing: "-0.025em",
             }}
           >
-            Contact Management
+            Clients Management
           </Typography>
         </Box>
       </Box>
