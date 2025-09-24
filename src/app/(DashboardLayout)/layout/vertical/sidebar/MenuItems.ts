@@ -81,7 +81,7 @@ const Menuitems: MenuitemsType[] = [
     id: uniqueId(),
     title: "Clients",
     icon: IconAward,
-    href: "/contact",
+    href: "/clients",
     // chip: "New",
     chipColor: "secondary",
   },
