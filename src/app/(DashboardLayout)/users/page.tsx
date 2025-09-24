@@ -131,41 +131,30 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  // Filter states
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [legalService, setLegalService] = useState("");
-  const [email, setEmail] = useState("");
-  const [state, setState] = useState("");
-  const [city, setCity] = useState("");
+  // Role filter state
+  const [roleFilter, setRoleFilter] = useState("");
 
   const fetchUsers = async (
     currentPage: number,
     limit: number,
-    filters: {
-      firstName?: string;
-      lastName?: string;
-      legalService?: string;
-      email?: string;
-      state?: string;
-      city?: string;
-    } = {}
+    role: string = ""
   ) => {
     try {
       setLoading(true);
 
+      const params: any = {
+        sortBy: "createdAt:desc",
+        limit: limit,
+        page: currentPage + 1, // API is 1-indexed, MUI pagination is 0-indexed
+      };
+
+      // Only add role parameter if a role is selected
+      if (role && role.trim() !== "") {
+        params.role = role;
+      }
+
       const response = await apiClient.get("/users", {
-        params: {
-          //   firstName: filters.firstName || "",
-          //   lastName: filters.lastName || "",
-          //   legalService: filters.legalService || "",
-          //   email: filters.email || "",
-          //   state: filters.state || "",
-          //   city: filters.city || "",
-          sortBy: "createdAt:desc",
-          limit: limit,
-          page: currentPage + 1, // API is 1-indexed, MUI pagination is 0-indexed
-        },
+        params: params,
       });
 
       setUsers(response.data.results || []);
@@ -180,24 +169,8 @@ const Users = () => {
   };
 
   useEffect(() => {
-    fetchUsers(page, rowsPerPage, {
-      firstName,
-      lastName,
-      legalService,
-      email,
-      state,
-      city,
-    });
-  }, [
-    page,
-    rowsPerPage,
-    firstName,
-    lastName,
-    legalService,
-    email,
-    state,
-    city,
-  ]);
+    fetchUsers(page, rowsPerPage, roleFilter);
+  }, [page, rowsPerPage, roleFilter]);
 
   const handleChangePage = (
     event: any,
@@ -212,39 +185,12 @@ const Users = () => {
     setPage(0); // Reset to first page when changing rows per page
   };
 
-  // Filter handlers
-  const handleFirstNameChange = (
+  // Role filter handler
+  const handleRoleFilterChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setFirstName(event.target.value);
-    setPage(0);
-  };
-
-  const handleLastNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLastName(event.target.value);
-    setPage(0);
-  };
-
-  const handleLegalServiceChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setLegalService(event.target.value);
-    setPage(0);
-  };
-
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-    setPage(0);
-  };
-
-  const handleStateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setState(event.target.value);
-    setPage(0);
-  };
-
-  const handleCityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCity(event.target.value);
-    setPage(0);
+    setRoleFilter(event.target.value);
+    setPage(0); // Reset to first page when filtering
   };
 
   // Generate a random avatar for contacts
@@ -294,8 +240,24 @@ const Users = () => {
         </Box>
       </Box>
 
-      {/* Filters */}
+      {/* Role Filter */}
       <BlankCard>
+        <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider" }}>
+          <TextField
+            label="Filter by Role"
+            variant="outlined"
+            size="small"
+            select
+            value={roleFilter}
+            onChange={handleRoleFilterChange}
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">All Roles</MenuItem>
+            <MenuItem value="admin">Admin</MenuItem>
+            <MenuItem value="attorney">Attorney</MenuItem>
+          </TextField>
+        </Box>
+
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
             <CircularProgress />
