@@ -146,13 +146,13 @@ const Menuitems: MenuitemsType[] = [
   //     },
   //   ],
   // },
-  // {
-  //   id: uniqueId(),
-  //   title: "Disabled",
-  //   icon: IconBan,
-  //   href: "",
-  //   disabled: true,
-  // },
+  {
+    id: uniqueId(),
+    title: "Articles",
+    icon: IconNotes,
+    href: "/articles",
+    // disabled: true,
+  },
   // {
   //   id: uniqueId(),
   //   title: "SubCaption",
