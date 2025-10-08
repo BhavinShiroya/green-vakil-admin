@@ -26,7 +26,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import { Delete as DeleteIcon } from "@mui/icons-material";
+import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
@@ -361,6 +361,12 @@ const Articles = () => {
     setArticleToDelete(null);
   };
 
+  // Handle edit article
+  const handleEditClick = (article: Article) => {
+    // Navigate to create-articles page with edit mode
+    window.location.href = `/create-articles?edit=true&id=${article.id}`;
+  };
+
   return (
     <>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -609,21 +615,44 @@ const Articles = () => {
                       </Tooltip>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <Tooltip title="Delete article" arrow placement="top">
-                        <IconButton
-                          onClick={() => handleDeleteClick(article)}
-                          size="small"
-                          sx={{
-                            color: "error.main",
-                            "&:hover": {
-                              backgroundColor: "error.dark",
-                              color: "white",
-                            },
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Tooltip title="Edit article" arrow placement="top">
+                          <IconButton
+                            onClick={() => handleEditClick(article)}
+                            size="small"
+                            sx={{
+                              color: "primary.main",
+                              "&:hover": {
+                                backgroundColor: "primary.dark",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete article" arrow placement="top">
+                          <IconButton
+                            onClick={() => handleDeleteClick(article)}
+                            size="small"
+                            sx={{
+                              color: "error.main",
+                              "&:hover": {
+                                backgroundColor: "error.dark",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}

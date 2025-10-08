@@ -10,6 +10,11 @@ interface ThumbnailProps {
   onUploadSuccess?: (uploadData: any) => void;
   error?: boolean;
   helperText?: string;
+  existingImages?: Array<{
+    fileUrl: string;
+    fileName: string;
+    fileSize?: number;
+  }>;
 }
 
 interface UploadResponse {
@@ -25,6 +30,7 @@ const Thumbnail = ({
   onUploadSuccess,
   error,
   helperText,
+  existingImages = [],
 }: ThumbnailProps) => {
   const theme = useTheme();
   const [uploading, setUploading] = useState(false);
@@ -222,6 +228,80 @@ const Thumbnail = ({
           {helperText}
         </Typography>
       )}
+      {/* Display existing images */}
+      {existingImages.length > 0 && (
+        <Box mt={2}>
+          <Typography variant="h6" fontSize="15px">
+            Current Images ({existingImages.length})
+          </Typography>
+          <Box mt={1}>
+            {existingImages.map((image, index) => (
+              <Box
+                key={index}
+                py={1}
+                mt={2}
+                sx={{ borderTop: `1px solid ${theme.palette.divider}` }}
+              >
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={1}
+                >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="body1" fontWeight="500">
+                      {image.fileName}
+                    </Typography>
+                    <Chip color="info" label="Current" size="small" />
+                  </Box>
+                  {image.fileSize && (
+                    <Chip color="primary" label={`${image.fileSize} Bytes`} />
+                  )}
+                </Box>
+
+                {/* Show existing image preview */}
+                <Box mt={2} sx={{ textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary" mb={1}>
+                    Current Image:
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      overflow: "hidden",
+                      borderRadius: 1,
+                      border: `1px solid ${theme.palette.divider}`,
+                      backgroundColor: theme.palette.grey[50],
+                    }}
+                  >
+                    <img
+                      src={image.fileUrl}
+                      alt={`Current image: ${image.fileName}`}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "200px",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                      onError={(e) => {
+                        console.error(
+                          "Error loading existing image:",
+                          image.fileUrl
+                        );
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )}
+
       <Box mt={2}>
         <Typography variant="h6" fontSize="15px">
           Uploaded Images ({acceptedFiles.length})

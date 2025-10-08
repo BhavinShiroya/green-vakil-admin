@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -46,9 +46,22 @@ interface FormData {
 
 const CreateArticles = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [savedContent, setSavedContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [articleId, setArticleId] = useState<string | null>(null);
+  const [articleData, setArticleData] = useState<any>(null);
+  const [existingImages, setExistingImages] = useState<
+    Array<{
+      fileUrl: string;
+      fileName: string;
+      fileSize?: number;
+    }>
+  >([]);
 
   // Simple state for form data
   const [formData, setFormData] = useState<FormData>({
@@ -92,6 +105,157 @@ const CreateArticles = () => {
     }
   }, [editor, errors]);
 
+  // Check for edit mode and fetch article data
+  useEffect(() => {
+    const edit = searchParams.get("edit");
+    const id = searchParams.get("id");
+
+    if (edit === "true" && id) {
+      setIsEditMode(true);
+      setArticleId(id);
+      fetchArticleData(id);
+    }
+  }, [searchParams]);
+
+  // Set editor content when editor is ready and we have article data
+  useEffect(() => {
+    if (editor && articleData && isEditMode) {
+      const content =
+        articleData.description ||
+        articleData.content ||
+        articleData.body ||
+        "";
+      console.log("Editor is ready, setting content:", content);
+
+      // Clean and format the content for the editor
+      const cleanContent = cleanHtmlContent(content);
+      editor.commands.setContent(cleanContent);
+    }
+  }, [editor, articleData, isEditMode]);
+
+  // Debug formData changes
+  useEffect(() => {
+    if (isEditMode) {
+      console.log("FormData updated:", formData);
+    }
+  }, [formData, isEditMode]);
+
+  // Fetch article data for editing
+  const fetchArticleData = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get(`/articles/${id}`);
+      const article = response.data;
+
+      console.log("Raw article data from API:", article);
+      console.log("Available fields:", Object.keys(article));
+
+      setArticleData(article);
+
+      // Extract existing image information
+      if (article.filePath) {
+        const imageData = {
+          fileUrl: article.filePath, // Assuming filePath is the full URL
+          fileName: article.fileName || `article-${article.id}-image`,
+          fileSize: article.fileSize || 0,
+        };
+        setExistingImages([imageData]);
+        console.log("Existing image data:", imageData);
+      } else {
+        setExistingImages([]);
+      }
+
+      // Pre-fill form data
+      const statusValue = getStatusValue(article.status);
+      const categoryValue = getCategoryValue(article.category);
+
+      console.log("Converted values:", {
+        originalStatus: article.status,
+        convertedStatus: statusValue,
+        originalCategory: article.category,
+        convertedCategory: categoryValue,
+        description: article.description,
+      });
+
+      console.log("Form data being set:", {
+        title: article.title || "",
+        status: statusValue,
+        category: categoryValue,
+      });
+
+      setFormData({
+        title: article.title || "",
+        thumbnail: [],
+        status: statusValue,
+        category: categoryValue,
+      });
+
+      // Set editor content with a delay to ensure editor is ready
+      const content =
+        article.description || article.content || article.body || "";
+      if (content) {
+        setTimeout(() => {
+          if (editor) {
+            console.log("Setting editor content:", content);
+            // Clean and format the content for the editor
+            const cleanContent = cleanHtmlContent(content);
+            editor.commands.setContent(cleanContent);
+          }
+        }, 100);
+      } else {
+        console.log("No content found in article data");
+      }
+
+      console.log("Article data loaded for editing:", article);
+    } catch (error) {
+      console.error("Error fetching article data:", error);
+      toast.error("Failed to load article data for editing");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to clean HTML content for the editor
+  const cleanHtmlContent = (content: string) => {
+    if (!content) return "";
+
+    // Decode HTML entities
+    const decoded = content
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ");
+
+    return decoded;
+  };
+
+  // Helper functions to convert API values to form values
+  const getStatusValue = (status: string) => {
+    const statusMap = {
+      draft: 0,
+      archived: 1,
+      published: 2,
+    };
+    return statusMap[status as keyof typeof statusMap] || 0;
+  };
+
+  const getCategoryValue = (category: string) => {
+    const categoryMap = {
+      "immigration-law": 0,
+      "real-estate-law": 1,
+      "corporate-business-law": 2,
+      "family-divorce-law": 3,
+      "estate-planning-wills": 4,
+      "criminal-defense": 5,
+      "personal-injury-law": 6,
+      "employment-labor-law": 7,
+      "not-sure-/-other": 8,
+    };
+    return categoryMap[category as keyof typeof categoryMap] || 0;
+  };
+
   const handleSave = async () => {
     // Clear previous errors
     setErrors({});
@@ -109,7 +273,11 @@ const CreateArticles = () => {
     if (!editor?.getText().trim()) {
       newErrors.content = "Article content is required";
     }
-    if (formData.thumbnail.length === 0) {
+    // Check for thumbnail - either new uploads or existing images in edit mode
+    const hasNewThumbnails = formData.thumbnail.length > 0;
+    const hasExistingImages = isEditMode && existingImages.length > 0;
+
+    if (!hasNewThumbnails && !hasExistingImages) {
       newErrors.thumbnail = "Thumbnail is required";
     }
 
@@ -127,10 +295,14 @@ const CreateArticles = () => {
         title: formData.title,
         slug: generateSlug(formData.title),
         description: content,
-        filePath: uploadedFileData?.fileUrl,
+        filePath:
+          uploadedFileData?.fileUrl ||
+          (isEditMode && existingImages.length > 0
+            ? existingImages[0].fileUrl
+            : undefined),
         category: getCategoryText(formData.category)
           .toLowerCase()
-          .replace(/\s+/g, "-"),
+          .replace(/[\s&]+/g, "-"),
         status: getStatusText(formData.status).toLowerCase(),
       };
 
@@ -143,17 +315,24 @@ const CreateArticles = () => {
         category: formData.category,
         statusText: getStatusText(formData.status),
         categoryText: getCategoryText(formData.category),
-        filePath: "Using real Unsplash image URL",
+        filePath: apiRequestBody.filePath,
+        isEditMode: isEditMode,
+        hasExistingImages: existingImages.length > 0,
+        hasNewUploads: formData.thumbnail.length > 0,
       });
 
       console.log("API Request Body:", apiRequestBody);
 
-      // Call API to save article
+      // Call API to save or update article
       try {
-        await saveArticle(apiRequestBody);
+        if (isEditMode && articleId) {
+          await updateArticle(articleId, apiRequestBody);
+        } else {
+          await saveArticle(apiRequestBody);
+        }
         setSavedContent(content);
       } catch (error) {
-        // Error is already handled in saveArticle function
+        // Error is already handled in saveArticle/updateArticle function
       }
     }
   };
@@ -231,6 +410,38 @@ const CreateArticles = () => {
     }
   };
 
+  // API call to update article
+  const updateArticle = async (id: string, articleData: any) => {
+    try {
+      setIsLoading(true);
+
+      const response = await apiClient.post(`/articles/${id}`, articleData);
+
+      console.log("Article updated successfully:", response.data);
+      toast.success("Article updated successfully!");
+
+      // Redirect to articles page after successful update
+      setTimeout(() => {
+        router.push("/articles");
+      }, 1500); // Wait 1.5 seconds to show the success message
+
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        "Error updating article:",
+        error.response?.data || error.message
+      );
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update article. Please try again.";
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleClear = () => {
     if (editor) {
       editor.commands.clearContent();
@@ -243,7 +454,7 @@ const CreateArticles = () => {
       <PageContainer title="Articles">
         <Box sx={{ maxWidth: 1200, mx: "auto" }}>
           <Typography variant="h4" gutterBottom>
-            Article Editor
+            {isEditMode ? "Edit Article" : "Article Editor"}
           </Typography>
           <Box sx={{ p: 3, textAlign: "center" }}>Loading editor...</Box>
         </Box>
@@ -263,7 +474,7 @@ const CreateArticles = () => {
         <BlankCard>
           <Box sx={{ maxWidth: 800, padding: 3, height: "fit-content" }}>
             <Typography variant="h4" gutterBottom>
-              Article Editor
+              {isEditMode ? "Edit Article" : "Article Editor"}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
               Create and edit your articles using the rich text editor below.
@@ -351,7 +562,13 @@ const CreateArticles = () => {
                 onClick={handleSave}
                 disabled={isLoading}
               >
-                {isLoading ? "Saving..." : "Save Article"}
+                {isLoading
+                  ? isEditMode
+                    ? "Updating..."
+                    : "Saving..."
+                  : isEditMode
+                  ? "Update Article"
+                  : "Save Article"}
               </Button>
               <Button
                 variant="outlined"
@@ -380,6 +597,7 @@ const CreateArticles = () => {
               }}
               error={!!errors.thumbnail}
               helperText={errors.thumbnail}
+              existingImages={existingImages}
             />
           </BlankCard>
           <Box sx={{ marginBlock: 3 }}>

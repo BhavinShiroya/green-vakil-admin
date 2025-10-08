@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import { Grid, Typography } from "@mui/material";
 import { MenuItem, Avatar } from "@mui/material";
@@ -13,6 +13,11 @@ interface StatusCardProps {
 
 const StatusCard = ({ value = 0, onChange }: StatusCardProps) => {
   const [status, setStatus] = useState(value);
+
+  // Sync internal state with prop changes
+  useEffect(() => {
+    setStatus(value);
+  }, [value]);
 
   const handleChange = (event: any) => {
     const newValue = event.target.value;
