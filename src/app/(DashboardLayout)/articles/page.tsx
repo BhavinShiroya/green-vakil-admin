@@ -414,6 +414,9 @@ const Articles = () => {
             >
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                    <Typography variant="h6">Image</Typography>
+                  </TableCell>
                   <TableCell sx={{ width: "20%" }}>
                     <Typography variant="h6">Title</Typography>
                   </TableCell>
@@ -426,14 +429,58 @@ const Articles = () => {
                   <TableCell sx={{ width: "10%" }}>
                     <Typography variant="h6">Status</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "40%", textAlign: "center" }}>
-                    <Typography variant="h6">Image</Typography>
-                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {articles.map((article, index) => (
                   <TableRow key={article.id}>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "80px",
+                          width: "100%",
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={
+                            article.filePath
+                              ? getArticleImageUrl(article.filePath) || ""
+                              : getRandomAvatar(index)
+                          }
+                          alt={article.title || "Article image"}
+                          sx={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "cover",
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            backgroundColor: "grey.100",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                              transition: "transform 0.2s ease-in-out",
+                            },
+                          }}
+                          onError={(e) => {
+                            console.error("Error loading article image:", {
+                              articleId: article.id,
+                              filePath: article.filePath,
+                              imageUrl: getArticleImageUrl(
+                                article.filePath || ""
+                              ),
+                              error: e,
+                            });
+                            // Show a fallback image
+                            e.currentTarget.src = getRandomAvatar(index);
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
                     <TableCell>
                       <Tooltip
                         title={article.title || "No title"}
@@ -509,63 +556,6 @@ const Articles = () => {
                           label={article.status || "No status"}
                         />
                       </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "80px",
-                          width: "100%",
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={
-                            article.filePath
-                              ? getArticleImageUrl(article.filePath) || ""
-                              : getRandomAvatar(index)
-                          }
-                          alt={article.title || "Article image"}
-                          sx={{
-                            maxWidth: "100%",
-                            maxHeight: "100%",
-                            objectFit: "cover",
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            backgroundColor: "grey.100",
-                            "&:hover": {
-                              opacity: 0.8,
-                              transform: "scale(1.02)",
-                              transition: "all 0.2s ease-in-out",
-                            },
-                          }}
-                          onClick={() =>
-                            article.filePath &&
-                            handleImageClick(article.filePath)
-                          }
-                          onLoad={() => {
-                            console.log(
-                              "Image loaded successfully:",
-                              article.filePath || "fallback"
-                            );
-                          }}
-                          onError={(e) => {
-                            console.error("Image failed to load:", {
-                              filePath: article.filePath,
-                              constructedUrl: getArticleImageUrl(
-                                article.filePath || ""
-                              ),
-                              error: e,
-                            });
-                            // Show a fallback image
-                            e.currentTarget.src = getRandomAvatar(index);
-                          }}
-                        />
-                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
