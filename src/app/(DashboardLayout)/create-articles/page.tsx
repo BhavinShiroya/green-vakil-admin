@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -44,6 +45,7 @@ interface FormData {
 }
 
 const CreateArticles = () => {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [savedContent, setSavedContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -206,6 +208,12 @@ const CreateArticles = () => {
 
       console.log("Article saved successfully:", response.data);
       toast.success("Article saved successfully!");
+
+      // Redirect to articles page after successful save
+      setTimeout(() => {
+        router.push("/articles");
+      }, 1500); // Wait 1.5 seconds to show the success message
+
       return response.data;
     } catch (error: any) {
       console.error(
@@ -245,9 +253,15 @@ const CreateArticles = () => {
 
   return (
     <Box p={3}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         <BlankCard>
-          <Box sx={{ maxWidth: 800, padding: 3 }}>
+          <Box sx={{ maxWidth: 800, padding: 3, height: "fit-content" }}>
             <Typography variant="h4" gutterBottom>
               Article Editor
             </Typography>
@@ -350,7 +364,7 @@ const CreateArticles = () => {
           </Box>
         </BlankCard>
 
-        <Box sx={{ paddingLeft: 3 }}>
+        <Box sx={{ paddingLeft: 3, width: "400px", flexShrink: 0 }}>
           <BlankCard>
             <Thumbnail
               onFilesChange={(files) => {
