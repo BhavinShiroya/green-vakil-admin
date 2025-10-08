@@ -26,6 +26,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import Link from "next/link";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
@@ -333,53 +334,68 @@ const Articles = () => {
       {/* Filters */}
       <BlankCard>
         <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider" }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              label="Filter by Category"
-              variant="outlined"
-              size="small"
-              select
-              value={categoryFilter}
-              onChange={handleCategoryFilterChange}
-              sx={{ minWidth: 200 }}
-            >
-              <MenuItem value="">All Categories</MenuItem>
-              <MenuItem value="immigration-law">Immigration Law</MenuItem>
-              <MenuItem value="real-estate-law">Real Estate Law</MenuItem>
-              <MenuItem value="corporate-&-business-law">
-                Corporate & Business Law
-              </MenuItem>
-              <MenuItem value="family-&-divorce-law">
-                Family & Divorce Law
-              </MenuItem>
-              <MenuItem value="estate-planning-&-wills">
-                Estate Planning & Wills
-              </MenuItem>
-              <MenuItem value="criminal-defense">Criminal Defense</MenuItem>
-              <MenuItem value="personal-injury-law">
-                Personal Injury Law
-              </MenuItem>
-              <MenuItem value="employment-&-labor-law">
-                Employment & Labor Law
-              </MenuItem>
-              <MenuItem value="not-sure-/-other">Not Sure / Other</MenuItem>
-            </TextField>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                label="Filter by Category"
+                variant="outlined"
+                size="small"
+                select
+                value={categoryFilter}
+                onChange={handleCategoryFilterChange}
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="">All Categories</MenuItem>
+                <MenuItem value="immigration-law">Immigration Law</MenuItem>
+                <MenuItem value="real-estate-law">Real Estate Law</MenuItem>
+                <MenuItem value="corporate-&-business-law">
+                  Corporate & Business Law
+                </MenuItem>
+                <MenuItem value="family-&-divorce-law">
+                  Family & Divorce Law
+                </MenuItem>
+                <MenuItem value="estate-planning-&-wills">
+                  Estate Planning & Wills
+                </MenuItem>
+                <MenuItem value="criminal-defense">Criminal Defense</MenuItem>
+                <MenuItem value="personal-injury-law">
+                  Personal Injury Law
+                </MenuItem>
+                <MenuItem value="employment-&-labor-law">
+                  Employment & Labor Law
+                </MenuItem>
+                <MenuItem value="not-sure-/-other">Not Sure / Other</MenuItem>
+              </TextField>
 
-            <TextField
-              label="Filter by Status"
-              variant="outlined"
-              size="small"
-              select
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              sx={{ minWidth: 200 }}
+              <TextField
+                label="Filter by Status"
+                variant="outlined"
+                size="small"
+                select
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="">All Statuses</MenuItem>
+                <MenuItem value="published">Published</MenuItem>
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="inactive">Inactive</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+              </TextField>
+            </Stack>
+
+            <Button
+              variant="contained"
+              component={Link}
+              href="/create-articles"
             >
-              <MenuItem value="">All Statuses</MenuItem>
-              <MenuItem value="published">Published</MenuItem>
-              <MenuItem value="draft">Draft</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-            </TextField>
+              Create Articles
+            </Button>
           </Stack>
         </Box>
 
