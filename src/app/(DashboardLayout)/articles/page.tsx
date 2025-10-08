@@ -26,6 +26,9 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import { Delete as DeleteIcon } from "@mui/icons-material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -145,6 +148,11 @@ const Articles = () => {
   // Image preview dialog state
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchArticles = async (
     currentPage: number,
@@ -313,6 +321,46 @@ const Articles = () => {
     setPreviewImage(null);
   };
 
+  // Handle delete article
+  const handleDeleteClick = (article: Article) => {
+    setArticleToDelete(article);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      setDeleting(true);
+      await apiClient.delete(`/articles/${articleToDelete.id}`);
+
+      // Remove the article from the local state
+      setArticles((prev) =>
+        prev.filter((article) => article.id !== articleToDelete.id)
+      );
+      setTotalArticles((prev) => prev - 1);
+
+      // Close modal
+      setDeleteModalOpen(false);
+      setArticleToDelete(null);
+
+      // Show success toast
+      toast.success("Article deleted successfully!");
+
+      console.log("Article deleted successfully");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      toast.error("Failed to delete article. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setArticleToDelete(null);
+  };
+
   return (
     <>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -428,6 +476,9 @@ const Articles = () => {
                   </TableCell>
                   <TableCell sx={{ width: "10%" }}>
                     <Typography variant="h6">Status</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "10%", textAlign: "center" }}>
+                    <Typography variant="h6">Actions</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -557,6 +608,23 @@ const Articles = () => {
                         />
                       </Tooltip>
                     </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Tooltip title="Delete article" arrow placement="top">
+                        <IconButton
+                          onClick={() => handleDeleteClick(article)}
+                          size="small"
+                          sx={{
+                            color: "error.main",
+                            "&:hover": {
+                              backgroundColor: "error.dark",
+                              color: "white",
+                            },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -564,7 +632,7 @@ const Articles = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={5}
+                    colSpan={6}
                     count={totalArticles}
                     rowsPerPage={rowsPerPage}
                     page={page}
@@ -616,6 +684,55 @@ const Articles = () => {
           <Button onClick={handleClosePreview}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete Article</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete the article "
+            {articleToDelete?.title || "Untitled"}"?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={
+              deleting ? <CircularProgress size={16} /> : <DeleteIcon />
+            }
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </>
   );
 };
