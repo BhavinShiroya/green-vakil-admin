@@ -6,11 +6,20 @@ import { MenuItem, Avatar } from "@mui/material";
 import CustomSelect from "../forms/theme-elements/CustomSelect";
 // import CustomSelect from "@/app/components/forms/theme-elements/CustomSelect";
 
-const StatusCard = () => {
-  const [status, setStatus] = useState(0);
+interface StatusCardProps {
+  value?: number;
+  onChange?: (value: number) => void;
+}
+
+const StatusCard = ({ value = 0, onChange }: StatusCardProps) => {
+  const [status, setStatus] = useState(value);
+
   const handleChange = (event: any) => {
-    setStatus(event.target.value);
-    console.log("test");
+    const newValue = event.target.value;
+    setStatus(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -44,7 +53,9 @@ const StatusCard = () => {
             <MenuItem value={2}>Scheduled</MenuItem>
             <MenuItem value={3}>In active</MenuItem>
           </CustomSelect>
-          <Typography variant="body2" mt={1} ml={1}>Set the article status.</Typography>
+          <Typography variant="body2" mt={1} ml={1}>
+            Set the article status.
+          </Typography>
         </Grid>
       </Grid>
     </Box>

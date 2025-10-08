@@ -6,11 +6,20 @@ import { MenuItem, Avatar } from "@mui/material";
 import CustomSelect from "../forms/theme-elements/CustomSelect";
 // import CustomSelect from "@/app/components/forms/theme-elements/CustomSelect";
 
-const CategoryCard = () => {
-  const [status, setStatus] = useState(0);
+interface CategoryCardProps {
+  value?: number;
+  onChange?: (value: number) => void;
+}
+
+const CategoryCard = ({ value = 0, onChange }: CategoryCardProps) => {
+  const [status, setStatus] = useState(value);
+
   const handleChange = (event: any) => {
-    setStatus(event.target.value);
-    console.log("test");
+    const newValue = event.target.value;
+    setStatus(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -39,12 +48,19 @@ const CategoryCard = () => {
       <Grid container mt={3}>
         <Grid size={12}>
           <CustomSelect value={status} onChange={handleChange} fullWidth>
-            <MenuItem value={0}>Category 1</MenuItem>
-            <MenuItem value={1}>Category 2</MenuItem>
-            <MenuItem value={2}>Category 3</MenuItem>
-            <MenuItem value={3}>Category 4</MenuItem>
+            <MenuItem value={0}>Immigration Law</MenuItem>
+            <MenuItem value={1}>Real Estate Law</MenuItem>
+            <MenuItem value={2}>Corporate & Business Law</MenuItem>
+            <MenuItem value={3}>Family & Divorce Law</MenuItem>
+            <MenuItem value={4}>Estate Planning & Wills</MenuItem>
+            <MenuItem value={5}>Criminal Defense</MenuItem>
+            <MenuItem value={6}>Personal Injury Law</MenuItem>
+            <MenuItem value={7}>Employment & Labor Law</MenuItem>
+            <MenuItem value={8}>Not Sure / Other</MenuItem>
           </CustomSelect>
-          <Typography variant="body2" mt={1} ml={1}>Set the article category.</Typography>
+          <Typography variant="body2" mt={1} ml={1}>
+            Set the article category.
+          </Typography>
         </Grid>
       </Grid>
     </Box>
