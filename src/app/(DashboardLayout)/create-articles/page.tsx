@@ -26,13 +26,13 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "./Tiptap.css";
-import Thumbnail from "@/app/components/Thumbnail/page";
+import Thumbnail from "@/app/components/Thumbnail/Thumbnail";
 import BlankCard from "@/app/components/shared/BlankCard";
 import { Grid } from "@mui/system";
 import CustomFormLabel from "@/app/components/forms/theme-elements/CustomFormLabel";
 import CustomTextField from "@/app/components/forms/theme-elements/CustomTextField";
-import StatusCard from "@/app/components/StatusCard/page";
-import CategoryCard from "@/app/components/categoryCard/page";
+import StatusCard from "@/app/components/StatusCard/StatusCard";
+import CategoryCard from "@/app/components/categoryCard/CategoryCard";
 import apiClient from "@/utils/axios";
 
 // Form data interface

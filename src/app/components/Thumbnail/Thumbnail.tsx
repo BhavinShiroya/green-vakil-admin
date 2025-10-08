@@ -94,6 +94,10 @@ const Thumbnail = ({
   };
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+    multiple: true, // Enable multiple file selection
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+    },
     onDrop: async (files) => {
       // Clear all previous errors when new files are dropped
       setUploadErrors([]);
@@ -183,7 +187,7 @@ const Thumbnail = ({
 
   return (
     <Box p={3}>
-      <Typography variant="h5">Thumbnail</Typography>
+      <Typography variant="h5">Thumbnails</Typography>
 
       <Box
         mt={3}
@@ -199,11 +203,14 @@ const Thumbnail = ({
         {...getRootProps({ className: "dropzone" })}
       >
         <input {...getInputProps()} />
-        <p>Drag &apos;n&apos; drop some files here, or click to select files</p>
+        <p>
+          Drag &apos;n&apos; drop multiple images here, or click to select
+          images
+        </p>
       </Box>
       <Typography variant="body2" textAlign="center" mt={1}>
-        Set the product thumbnail image. Only *.png, *.jpg and *.jpeg image
-        files are accepted.
+        Upload multiple thumbnail images. Only *.png, *.jpg, *.jpeg, *.gif, and
+        *.webp image files are accepted.
       </Typography>
       {helperText && (
         <Typography
@@ -217,7 +224,7 @@ const Thumbnail = ({
       )}
       <Box mt={2}>
         <Typography variant="h6" fontSize="15px">
-          Files
+          Uploaded Images ({acceptedFiles.length})
         </Typography>
         <Typography variant="body1">{files}</Typography>
       </Box>
