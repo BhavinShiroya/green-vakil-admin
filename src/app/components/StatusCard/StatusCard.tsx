@@ -48,10 +48,9 @@ const StatusCard = ({ value = 0, onChange }: StatusCardProps) => {
       <Grid container mt={3}>
         <Grid size={12}>
           <CustomSelect value={status} onChange={handleChange} fullWidth>
-            <MenuItem value={0}>Published</MenuItem>
-            <MenuItem value={1}>Draft</MenuItem>
-            <MenuItem value={2}>Scheduled</MenuItem>
-            <MenuItem value={3}>In active</MenuItem>
+            <MenuItem value={0}>Draft</MenuItem>
+            <MenuItem value={1}>Archived</MenuItem>
+            <MenuItem value={2}>Published</MenuItem>
           </CustomSelect>
           <Typography variant="body2" mt={1} ml={1}>
             Set the article status.

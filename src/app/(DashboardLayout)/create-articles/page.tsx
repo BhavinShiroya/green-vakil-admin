@@ -158,10 +158,9 @@ const CreateArticles = () => {
 
   const getStatusText = (statusValue: number) => {
     const statusMap = {
-      0: "Published",
-      1: "Draft",
-      2: "Scheduled",
-      3: "In active",
+      0: "Draft",
+      1: "Archived",
+      2: "Published",
     };
     return statusMap[statusValue as keyof typeof statusMap] || "Unknown";
   };
