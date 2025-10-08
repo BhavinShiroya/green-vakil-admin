@@ -573,7 +573,7 @@ const CreateArticles = () => {
               <Button
                 variant="outlined"
                 onClick={handleClear}
-                disabled={!editor?.getText().trim()}
+                // disabled={!editor?.getText().trim()}
               >
                 Clear
               </Button>
