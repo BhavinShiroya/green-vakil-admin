@@ -278,6 +278,8 @@ const CreateArticles = () => {
     }
     if (!formData.subtitle.trim()) {
       newErrors.subtitle = "Subtitle is required";
+    } else if (formData.subtitle.length > 250) {
+      newErrors.subtitle = "Subtitle must be 250 characters or less";
     }
     if (!editor?.getText().trim()) {
       newErrors.content = "Article content is required";
@@ -532,14 +534,21 @@ const CreateArticles = () => {
                   fullWidth
                   value={formData.subtitle}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setFormData({ ...formData, subtitle: e.target.value });
-                    // Clear error when user starts typing
-                    if (errors.subtitle) {
-                      setErrors({ ...errors, subtitle: undefined });
+                    const value = e.target.value;
+                    if (value.length <= 250) {
+                      setFormData({ ...formData, subtitle: value });
+                      // Clear error when user starts typing
+                      if (errors.subtitle) {
+                        setErrors({ ...errors, subtitle: undefined });
+                      }
                     }
                   }}
                   error={!!errors.subtitle}
-                  helperText={errors.subtitle}
+                  helperText={
+                    errors.subtitle ||
+                    `${formData.subtitle.length}/250 characters`
+                  }
+                  inputProps={{ maxLength: 250 }}
                 />
               </Grid>
               <Grid display="flex" alignItems="center" size={12} mt={2}>
