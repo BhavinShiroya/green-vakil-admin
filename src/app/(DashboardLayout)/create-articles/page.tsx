@@ -39,6 +39,7 @@ import apiClient from "@/utils/axios";
 // Form data interface
 interface FormData {
   title: string;
+  subtitle: string;
   thumbnail: File[];
   status: number;
   category: number;
@@ -66,6 +67,7 @@ const CreateArticles = () => {
   // Simple state for form data
   const [formData, setFormData] = useState<FormData>({
     title: "",
+    subtitle: "",
     thumbnail: [],
     status: 0,
     category: 0,
@@ -75,6 +77,7 @@ const CreateArticles = () => {
   // Error state for validation messages
   const [errors, setErrors] = useState<{
     title?: string;
+    subtitle?: string;
     content?: string;
     thumbnail?: string;
   }>({});
@@ -179,12 +182,14 @@ const CreateArticles = () => {
 
       console.log("Form data being set:", {
         title: article.title || "",
+        subtitle: article.subtitle || "",
         status: statusValue,
         category: categoryValue,
       });
 
       setFormData({
         title: article.title || "",
+        subtitle: article.subtitle || "",
         thumbnail: [],
         status: statusValue,
         category: categoryValue,
@@ -263,12 +268,16 @@ const CreateArticles = () => {
     // Simple validation
     const newErrors: {
       title?: string;
+      subtitle?: string;
       content?: string;
       thumbnail?: string;
     } = {};
 
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
+    }
+    if (!formData.subtitle.trim()) {
+      newErrors.subtitle = "Subtitle is required";
     }
     if (!editor?.getText().trim()) {
       newErrors.content = "Article content is required";
@@ -293,6 +302,7 @@ const CreateArticles = () => {
       // Prepare API request body
       const apiRequestBody = {
         title: formData.title,
+        subtitle: formData.subtitle,
         slug: generateSlug(formData.title),
         description: content,
         filePath:
@@ -309,6 +319,7 @@ const CreateArticles = () => {
       // Log all data to console
       console.log("Article Form Data:", {
         title: formData.title,
+        subtitle: formData.subtitle,
         content: content,
         thumbnail: formData.thumbnail,
         status: formData.status,
@@ -504,6 +515,31 @@ const CreateArticles = () => {
                   }}
                   error={!!errors.title}
                   helperText={errors.title}
+                />
+              </Grid>
+              <Grid display="flex" alignItems="center" size={12} mt={2}>
+                <CustomFormLabel htmlFor="subtitle" sx={{ mt: 0 }}>
+                  Article Subtitle{" "}
+                  <Typography color="error.main" component="span">
+                    *
+                  </Typography>
+                </CustomFormLabel>
+              </Grid>
+              <Grid size={12}>
+                <CustomTextField
+                  id="subtitle"
+                  placeholder="Article Subtitle"
+                  fullWidth
+                  value={formData.subtitle}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormData({ ...formData, subtitle: e.target.value });
+                    // Clear error when user starts typing
+                    if (errors.subtitle) {
+                      setErrors({ ...errors, subtitle: undefined });
+                    }
+                  }}
+                  error={!!errors.subtitle}
+                  helperText={errors.subtitle}
                 />
               </Grid>
               <Grid display="flex" alignItems="center" size={12} mt={2}>
