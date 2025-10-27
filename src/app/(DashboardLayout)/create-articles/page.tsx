@@ -40,6 +40,7 @@ import apiClient from "@/utils/axios";
 interface FormData {
   title: string;
   subtitle: string;
+  authorName: string;
   thumbnail: File[];
   status: number;
   category: number;
@@ -68,6 +69,7 @@ const CreateArticles = () => {
   const [formData, setFormData] = useState<FormData>({
     title: "",
     subtitle: "",
+    authorName: "",
     thumbnail: [],
     status: 0,
     category: 0,
@@ -78,6 +80,7 @@ const CreateArticles = () => {
   const [errors, setErrors] = useState<{
     title?: string;
     subtitle?: string;
+    authorName?: string;
     content?: string;
     thumbnail?: string;
   }>({});
@@ -180,16 +183,10 @@ const CreateArticles = () => {
         description: article.description,
       });
 
-      console.log("Form data being set:", {
-        title: article.title || "",
-        subtitle: article.subtitle || "",
-        status: statusValue,
-        category: categoryValue,
-      });
-
       setFormData({
         title: article.title || "",
         subtitle: article.subtitle || "",
+        authorName: article.authorName || "",
         thumbnail: [],
         status: statusValue,
         category: categoryValue,
@@ -269,6 +266,7 @@ const CreateArticles = () => {
     const newErrors: {
       title?: string;
       subtitle?: string;
+      authorName?: string;
       content?: string;
       thumbnail?: string;
     } = {};
@@ -280,6 +278,9 @@ const CreateArticles = () => {
       newErrors.subtitle = "Subtitle is required";
     } else if (formData.subtitle.length > 250) {
       newErrors.subtitle = "Subtitle must be 250 characters or less";
+    }
+    if (!formData.authorName.trim()) {
+      newErrors.authorName = "Author name is required";
     }
     if (!editor?.getText().trim()) {
       newErrors.content = "Article content is required";
@@ -305,6 +306,7 @@ const CreateArticles = () => {
       const apiRequestBody = {
         title: formData.title,
         subtitle: formData.subtitle,
+        authorName: formData.authorName,
         slug: generateSlug(formData.title),
         description: content,
         filePath:
@@ -319,22 +321,6 @@ const CreateArticles = () => {
       };
 
       // Log all data to console
-      console.log("Article Form Data:", {
-        title: formData.title,
-        subtitle: formData.subtitle,
-        content: content,
-        thumbnail: formData.thumbnail,
-        status: formData.status,
-        category: formData.category,
-        statusText: getStatusText(formData.status),
-        categoryText: getCategoryText(formData.category),
-        filePath: apiRequestBody.filePath,
-        isEditMode: isEditMode,
-        hasExistingImages: existingImages.length > 0,
-        hasNewUploads: formData.thumbnail.length > 0,
-      });
-
-      console.log("API Request Body:", apiRequestBody);
 
       // Call API to save or update article
       try {
@@ -549,6 +535,31 @@ const CreateArticles = () => {
                     `${formData.subtitle.length}/250 characters`
                   }
                   inputProps={{ maxLength: 250 }}
+                />
+              </Grid>
+              <Grid display="flex" alignItems="center" size={12} mt={2}>
+                <CustomFormLabel htmlFor="authorName" sx={{ mt: 0 }}>
+                  Author Name{" "}
+                  <Typography color="error.main" component="span">
+                    *
+                  </Typography>
+                </CustomFormLabel>
+              </Grid>
+              <Grid size={12}>
+                <CustomTextField
+                  id="authorName"
+                  placeholder="Author Name"
+                  fullWidth
+                  value={formData.authorName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormData({ ...formData, authorName: e.target.value });
+                    // Clear error when user starts typing
+                    if (errors.authorName) {
+                      setErrors({ ...errors, authorName: undefined });
+                    }
+                  }}
+                  error={!!errors.authorName}
+                  helperText={errors.authorName}
                 />
               </Grid>
               <Grid display="flex" alignItems="center" size={12} mt={2}>
