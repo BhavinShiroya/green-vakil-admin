@@ -153,6 +153,12 @@ const Menuitems: MenuitemsType[] = [
     href: "/articles",
     // disabled: true,
   },
+  {
+    id: uniqueId(),
+    title: "Newsletter",
+    icon: IconMail,
+    href: "/newsletters",
+  },
   // {
   //   id: uniqueId(),
   //   title: "SubCaption",
