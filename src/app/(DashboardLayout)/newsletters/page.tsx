@@ -39,6 +39,7 @@ import { Stack } from "@mui/system";
 import BlankCard from "@/app/components/shared/BlankCard";
 import { useEffect, useState } from "react";
 import apiClient from "@/utils/axios";
+import RoleGuard from "@/app/components/RoleGuard";
 
 // Define the newsletter interface based on the API response
 interface Newsletter {
@@ -283,7 +284,7 @@ const Newsletters = () => {
   };
 
   return (
-    <>
+    <RoleGuard allowedRoles={["admin"]}>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
         <Box>
           <Typography
@@ -515,7 +516,7 @@ const Newsletters = () => {
         pauseOnHover
         theme="light"
       />
-    </>
+    </RoleGuard>
   );
 };
 

@@ -13,6 +13,7 @@ interface MenuitemsType {
   chipColor?: string;
   variant?: string;
   external?: boolean;
+  roles?: string[]; // Array of roles that can see this menu item
 }
 import {
   IconAward,
@@ -76,6 +77,7 @@ const Menuitems: MenuitemsType[] = [
     title: "Dashboard",
     icon: IconAperture,
     href: "/dashboard",
+    roles: ["admin"],
   },
   {
     id: uniqueId(),
@@ -84,6 +86,7 @@ const Menuitems: MenuitemsType[] = [
     href: "/clients",
     // chip: "New",
     chipColor: "secondary",
+    roles: ["admin"],
   },
 
   {
@@ -93,6 +96,7 @@ const Menuitems: MenuitemsType[] = [
     href: "/users",
     // chip: "New",
     chipColor: "secondary",
+    roles: ["admin"],
   },
   // {
   //   navlabel: true,
@@ -152,12 +156,14 @@ const Menuitems: MenuitemsType[] = [
     icon: IconNotes,
     href: "/articles",
     // disabled: true,
+    roles: ["admin", "attorney"],
   },
   {
     id: uniqueId(),
     title: "Newsletter",
     icon: IconMail,
     href: "/newsletters",
+    roles: ["admin"],
   },
   // {
   //   id: uniqueId(),
