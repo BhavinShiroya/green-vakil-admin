@@ -18,6 +18,11 @@ import {
   TableContainer,
   CircularProgress,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -25,6 +30,8 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import { Delete as DeleteIcon } from "@mui/icons-material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import ParentCard from "@/app/components/shared/ParentCard";
 import { Stack } from "@mui/system";
@@ -133,6 +140,11 @@ const Contact = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalContacts, setTotalContacts] = useState(0);
 
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const fetchContacts = async (currentPage: number, limit: number) => {
     try {
       setLoading(true);
@@ -200,6 +212,44 @@ const Contact = () => {
       minute: "2-digit",
       hour12: false,
     });
+  };
+
+  // Handle delete contact
+  const handleDeleteClick = (contact: Contact) => {
+    setContactToDelete(contact);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!contactToDelete) return;
+
+    try {
+      setDeleting(true);
+      await apiClient.delete(`/contacts/${contactToDelete.id}`);
+
+      // Remove the contact from the local state
+      setContacts((prev) =>
+        prev.filter((contact) => contact.id !== contactToDelete.id)
+      );
+      setTotalContacts((prev) => prev - 1);
+
+      // Close modal
+      setDeleteModalOpen(false);
+      setContactToDelete(null);
+
+      // Show success toast
+      toast.success("Client deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error("Failed to delete client. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setContactToDelete(null);
   };
 
   return (
@@ -399,6 +449,7 @@ const Contact = () => {
                     <TableCell sx={{ textAlign: "center" }}>
                       <Tooltip title="Delete client" arrow placement="top">
                         <IconButton
+                          onClick={() => handleDeleteClick(contact)}
                           size="small"
                           sx={{
                             color: "error.main",
@@ -438,6 +489,58 @@ const Contact = () => {
           </TableContainer>
         )}
       </BlankCard>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete Client</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete the client "
+            {contactToDelete
+              ? `${contactToDelete.firstName} ${contactToDelete.lastName}`
+              : "Untitled"}
+            "?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={
+              deleting ? <CircularProgress size={16} /> : <DeleteIcon />
+            }
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {/* </ParentCard> */}
     </>
   );
