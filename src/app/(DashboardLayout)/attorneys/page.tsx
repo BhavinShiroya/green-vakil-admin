@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import { useTheme } from "@mui/material/styles";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import {
   Typography,
   TableHead,
@@ -24,13 +27,19 @@ import {
   DialogActions,
   Button,
   TextField,
+  MenuItem,
+  Autocomplete,
 } from "@mui/material";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Add as AddIcon,
+} from "@mui/icons-material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,6 +49,7 @@ import { useEffect, useState } from "react";
 import apiClient from "@/utils/axios";
 import RoleGuard from "@/app/components/RoleGuard";
 import PageContainer from "@/app/components/container/PageContainer";
+import { State, City } from "country-state-city";
 
 // Define the attorney interface based on the API response
 interface Attorney {
@@ -152,6 +162,10 @@ const Attorneys = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
+  // Add modal state
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attorneyToEdit, setAttorneyToEdit] = useState<Attorney | null>(null);
@@ -164,6 +178,65 @@ const Attorneys = () => {
     city: "",
     legalService: "",
   });
+
+  // Validation schema for add attorney form
+  const addAttorneySchema = yup.object().shape({
+    fullName: yup.string().required("Full name is required"),
+    email: yup
+      .string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    phone: yup
+      .string()
+      .required("Phone number is required")
+      .test(
+        "phone-format",
+        "Phone number must be in format: XXX-XXX-XXXX",
+        function (value) {
+          if (!value || value === "") return true; // Allow empty
+          return /^\d{3}-\d{3}-\d{4}$/.test(value);
+        }
+      ),
+    state: yup.string().required("State is required"),
+    city: yup
+      .string()
+      .nullable()
+      .required("City is required")
+      .transform((value) => value || ""),
+    legalService: yup.string().required("Legal service is required"),
+  });
+
+  // State and city dropdown state
+  const [states, setStates] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [selectedState, setSelectedState] = useState<string>("");
+
+  // React Hook Form setup for add attorney
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+    setValue,
+    trigger,
+  } = useForm({
+    resolver: yupResolver(addAttorneySchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      state: "",
+      city: "",
+      legalService: "",
+    },
+  });
+
+  // Initialize US states
+  useEffect(() => {
+    const usStates = State.getStatesOfCountry("US");
+    setStates(usStates.map((state) => state.name));
+  }, []);
 
   const fetchAttorneys = async (currentPage: number, limit: number) => {
     try {
@@ -222,6 +295,63 @@ const Attorneys = () => {
       hour12: false,
     });
   };
+
+  // Handle add attorney
+  const handleAddClick = () => {
+    setAddModalOpen(true);
+  };
+
+  const handleAddClose = () => {
+    setAddModalOpen(false);
+    reset();
+    setSelectedState("");
+    setCities([]);
+  };
+
+  const onSubmitAddAttorney = async (data: any) => {
+    try {
+      setAdding(true);
+      await apiClient.post("/attorneys", {
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phone,
+        state: data.state,
+        city: data.city,
+        legalService: data.legalService,
+      });
+
+      // Refresh the attorneys list
+      await fetchAttorneys(page, rowsPerPage);
+
+      // Close modal and reset form
+      handleAddClose();
+
+      // Show success toast
+      toast.success("Attorney added successfully!");
+    } catch (error: any) {
+      console.error("Error adding attorney:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to add attorney. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  // Legal services options
+  const legalServices = [
+    "Immigration Law",
+    "Real Estate Law",
+    "Corporate Business Law",
+    "Family Divorce Law",
+    "Estate Planning Wills",
+    "Criminal Defense",
+    "Personal Injury Law",
+    "Employment Labor Law",
+    "Not Sure / Other",
+  ];
 
   // Handle delete attorney
   const handleDeleteClick = (attorney: Attorney) => {
@@ -337,7 +467,15 @@ const Attorneys = () => {
         title="Attorneys | Greenway Lawyer Admin"
         description="Attorney Management for Greenway Lawyer"
       >
-        <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
+        <Box
+          sx={{
+            mb: 4,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
           <Box>
             <Typography
               variant="h4"
@@ -351,6 +489,17 @@ const Attorneys = () => {
               Attorneys Management
             </Typography>
           </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleAddClick}
+            sx={{
+              textTransform: "none",
+            }}
+          >
+            Add Attorney
+          </Button>
         </Box>
 
         <BlankCard>
@@ -677,6 +826,262 @@ const Attorneys = () => {
               }
             >
               {editing ? "Updating..." : "Update"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Add Attorney Dialog */}
+        <Dialog
+          open={addModalOpen}
+          onClose={handleAddClose}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Add Attorney</DialogTitle>
+          <DialogContent>
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmitAddAttorney)}
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+            >
+              {/* First Name and Email in one row */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Controller
+                  name="fullName"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Full Name"
+                      fullWidth
+                      variant="outlined"
+                      error={!!errors.fullName}
+                      helperText={errors.fullName?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Email"
+                      type="email"
+                      fullWidth
+                      variant="outlined"
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                    />
+                  )}
+                />
+              </Box>
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Phone Number"
+                    fullWidth
+                    variant="outlined"
+                    error={!!errors.phone}
+                    helperText={errors.phone?.message}
+                    inputProps={{
+                      maxLength: 12,
+                    }}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Remove all non-digit characters
+                      const digits = value.replace(/\D/g, "");
+                      // Limit to 10 digits
+                      const limitedDigits = digits.slice(0, 10);
+                      // Format as XXX-XXX-XXXX
+                      let formatted = "";
+                      if (limitedDigits.length > 0) {
+                        if (limitedDigits.length <= 3) {
+                          formatted = limitedDigits;
+                        } else if (limitedDigits.length <= 6) {
+                          formatted = `${limitedDigits.slice(
+                            0,
+                            3
+                          )}-${limitedDigits.slice(3)}`;
+                        } else {
+                          formatted = `${limitedDigits.slice(
+                            0,
+                            3
+                          )}-${limitedDigits.slice(3, 6)}-${limitedDigits.slice(
+                            6
+                          )}`;
+                        }
+                      }
+                      field.onChange(formatted);
+                    }}
+                  />
+                )}
+              />
+              {/* State and City in one row */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Controller
+                  name="state"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      options={states}
+                      value={selectedState || null}
+                      sx={{ width: "100%" }}
+                      onChange={(event, newValue) => {
+                        const stateValue = newValue || "";
+                        field.onChange(stateValue);
+                        setSelectedState(stateValue);
+
+                        setValue("city", "" as any); // Clear city form field
+                        trigger("city"); // Revalidate city field
+                        if (newValue === "American Samoa") {
+                          setCities(["Pago Pago", "Tafuna", "Leone"]);
+                        } else if (newValue === "Baker Island") {
+                          setCities(["Baker City"]);
+                        } else if (newValue === "Wake Island") {
+                          setCities(["Wake City"]);
+                        } else if (
+                          newValue === "United States Virgin Islands"
+                        ) {
+                          setCities([
+                            "Charlotte Amalie",
+                            "Christiansted",
+                            "Frederiksted",
+                          ]);
+                        } else if (
+                          newValue === "United States Minor Outlying Islands"
+                        ) {
+                          setCities(["Johnston Atoll", "Kingman Reef"]);
+                        } else if (newValue === "Palmyra Atoll") {
+                          setCities(["Cooper Island"]);
+                        } else if (newValue === "Northern Mariana Islands") {
+                          setCities(["Saipan", "Tinian", "Rota"]);
+                        } else if (newValue === "Navassa Island") {
+                          setCities(["Navassa City"]);
+                        } else if (newValue === "Midway Atoll") {
+                          setCities(["Sand Island"]);
+                        } else if (newValue === "Jarvis Island") {
+                          setCities(["Jarvis City"]);
+                        } else if (newValue === "Johnston Atoll") {
+                          setCities(["Johnston City"]);
+                        } else if (newValue === "Howland Island") {
+                          setCities(["Howland City"]);
+                        } else if (newValue === "Kingman Reef") {
+                          setCities(["Kingman City"]);
+                        } else if (newValue) {
+                          const selectedStateObj = State.getStatesOfCountry(
+                            "US"
+                          ).find((state) => state.name === newValue);
+                          const stateCode = selectedStateObj?.isoCode;
+                          if (stateCode) {
+                            const citiesInState = City.getCitiesOfState(
+                              "US",
+                              stateCode
+                            );
+                            setCities(citiesInState.map((city) => city.name));
+                          }
+                        } else {
+                          setCities([]);
+                        }
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        // Update selectedState when user types, so city field gets enabled
+                        setSelectedState(newInputValue);
+                        field.onChange(newInputValue || "");
+                        // Clear city when state input is cleared or changed
+                        setValue("city", "" as any);
+                        trigger("city");
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="State"
+                          variant="outlined"
+                          fullWidth
+                          error={!!errors.state}
+                          helperText={errors.state ? errors.state.message : ""}
+                        />
+                      )}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="city"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      freeSolo
+                      {...field}
+                      options={cities}
+                      value={(watch("city") as unknown as string) || ""}
+                      sx={{ width: "100%" }}
+                      onChange={(event, newValue) => {
+                        field.onChange(newValue || "");
+                        // Trigger validation to clear any errors
+                        trigger("city");
+                      }}
+                      onInputChange={(event, newInputValue) => {
+                        // Update form field value when user types custom city
+                        field.onChange(newInputValue || "");
+
+                        // Trigger validation to clear any errors
+                        trigger("city");
+                      }}
+                      disabled={!watch("state")}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="City"
+                          variant="outlined"
+                          fullWidth
+                          error={!!errors.city}
+                          helperText={errors.city ? errors.city.message : ""}
+                        />
+                      )}
+                    />
+                  )}
+                />
+              </Box>
+              <Controller
+                name="legalService"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Legal Service"
+                    select
+                    fullWidth
+                    variant="outlined"
+                    error={!!errors.legalService}
+                    helperText={errors.legalService?.message}
+                  >
+                    {legalServices.map((service) => (
+                      <MenuItem key={service} value={service}>
+                        {service}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleAddClose} disabled={adding}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit(onSubmitAddAttorney)}
+              color="primary"
+              variant="contained"
+              disabled={adding}
+              startIcon={adding ? <CircularProgress size={16} /> : <AddIcon />}
+            >
+              {adding ? "Adding..." : "Save"}
             </Button>
           </DialogActions>
         </Dialog>
