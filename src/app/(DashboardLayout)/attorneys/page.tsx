@@ -6,6 +6,7 @@ import {
   Typography,
   TableHead,
   Avatar,
+  Chip,
   Box,
   Table,
   TableBody,
@@ -368,19 +369,25 @@ const Attorneys = () => {
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ width: "25%" }}>
+                    <TableCell sx={{ width: "16%" }}>
                       <Typography variant="h6">Name</Typography>
                     </TableCell>
-                    <TableCell sx={{ width: "25%" }}>
+                    <TableCell sx={{ width: "16%" }}>
                       <Typography variant="h6">Email</Typography>
                     </TableCell>
-                    <TableCell sx={{ width: "20%" }}>
+                    <TableCell sx={{ width: "14%" }}>
                       <Typography variant="h6">Phone</Typography>
                     </TableCell>
-                    <TableCell sx={{ width: "20%" }}>
+                    <TableCell sx={{ width: "14%" }}>
+                      <Typography variant="h6">Legal Service</Typography>
+                    </TableCell>
+                    <TableCell sx={{ width: "14%" }}>
+                      <Typography variant="h6">Location</Typography>
+                    </TableCell>
+                    <TableCell sx={{ width: "14%" }}>
                       <Typography variant="h6">Created Date</Typography>
                     </TableCell>
-                    <TableCell sx={{ width: "10%", textAlign: "center" }}>
+                    <TableCell sx={{ width: "12%", textAlign: "center" }}>
                       <Typography variant="h6">Actions</Typography>
                     </TableCell>
                   </TableRow>
@@ -454,53 +461,82 @@ const Attorneys = () => {
                         </Tooltip>
                       </TableCell>
                       <TableCell>
+                        <Tooltip
+                          title={attorney.legalService || "N/A"}
+                          arrow
+                          placement="top"
+                        >
+                          <Chip
+                            color="primary"
+                            sx={{
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                            }}
+                            size="small"
+                            label={attorney.legalService || "N/A"}
+                          />
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip
+                          title={
+                            attorney.city && attorney.state
+                              ? `${attorney.city}, ${attorney.state}`
+                              : attorney.city || attorney.state || "N/A"
+                          }
+                          arrow
+                          placement="top"
+                        >
+                          <Box>
+                            <Typography
+                              color="textSecondary"
+                              variant="subtitle2"
+                              fontWeight="400"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {attorney.city || "N/A"}
+                            </Typography>
+                            <Typography
+                              color="textSecondary"
+                              variant="subtitle2"
+                              fontWeight="400"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {attorney.state || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
                         <Typography variant="subtitle2" fontWeight="400">
                           {formatDate(attorney.createdAt)}
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Tooltip title="Edit attorney" arrow placement="top">
-                            <IconButton
-                              onClick={() => handleEditClick(attorney)}
-                              size="small"
-                              sx={{
-                                color: "primary.main",
-                                "&:hover": {
-                                  backgroundColor: "primary.dark",
-                                  color: "white",
-                                },
-                              }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip
-                            title="Delete attorney"
-                            arrow
-                            placement="top"
+                        <Tooltip title="Delete attorney" arrow placement="top">
+                          <IconButton
+                            onClick={() => handleDeleteClick(attorney)}
+                            size="small"
+                            sx={{
+                              color: "error.main",
+                              "&:hover": {
+                                backgroundColor: "error.dark",
+                                color: "white",
+                              },
+                            }}
                           >
-                            <IconButton
-                              onClick={() => handleDeleteClick(attorney)}
-                              size="small"
-                              sx={{
-                                color: "error.main",
-                                "&:hover": {
-                                  backgroundColor: "error.dark",
-                                  color: "white",
-                                },
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -509,7 +545,7 @@ const Attorneys = () => {
                   <TableRow>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
-                      colSpan={5}
+                      colSpan={7}
                       count={totalAttorneys}
                       rowsPerPage={rowsPerPage}
                       page={page}
