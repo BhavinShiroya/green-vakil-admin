@@ -7,16 +7,56 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import Typography from "@mui/material/Typography";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import * as dropdownData from "./data";
 
 import { IconMail } from "@tabler/icons-react";
 import { Stack } from "@mui/system";
 import Image from "next/image";
 import { useAuth } from "@/app/context/authContext";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { toast } from "react-toastify";
+import apiClient from "@/utils/axios";
+
+// Validation schema for change password
+const changePasswordSchema = yup.object().shape({
+  currentPassword: yup.string().required("Current password is required"),
+  newPassword: yup
+    .string()
+    .required("New password is required")
+    .min(6, "Password must be at least 6 characters"),
+  confirmPassword: yup
+    .string()
+    .required("Confirm password is required")
+    .oneOf([yup.ref("newPassword")], "Passwords must match"),
+});
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const [changing, setChanging] = useState(false);
   const { logout, user, isAuthenticated } = useAuth();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
@@ -28,6 +68,41 @@ const Profile = () => {
   const handleLogout = () => {
     logout();
     handleClose2();
+  };
+
+  const handleChangePasswordClick = () => {
+    setChangePasswordModalOpen(true);
+    handleClose2();
+  };
+
+  const handleChangePasswordClose = () => {
+    setChangePasswordModalOpen(false);
+    reset();
+  };
+
+  const onSubmitChangePassword = async (data: any) => {
+    try {
+      setChanging(true);
+      await apiClient.post("/auth/change-password", {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+
+      // Close modal and reset form
+      handleChangePasswordClose();
+
+      // Show success toast
+      toast.success("Password changed successfully!");
+    } catch (error: any) {
+      console.error("Error changing password:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to change password. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setChanging(false);
+    }
   };
 
   return (
@@ -105,8 +180,20 @@ const Profile = () => {
         <Divider />
         {dropdownData.profile.map((profile) => (
           <Box key={profile.title}>
-            <Box sx={{ py: 2, px: 0 }} className="hover-text-primary">
-              <Link href={profile.href}>
+            <Box
+              sx={{ py: 2, px: 0 }}
+              className="hover-text-primary"
+              onClick={
+                profile.title === "Change Password"
+                  ? handleChangePasswordClick
+                  : undefined
+              }
+              style={{
+                cursor:
+                  profile.title === "Change Password" ? "pointer" : "default",
+              }}
+            >
+              {profile.title === "Change Password" ? (
                 <Stack direction="row" spacing={2}>
                   <Box
                     width="45px"
@@ -152,7 +239,55 @@ const Profile = () => {
                     </Typography>
                   </Box>
                 </Stack>
-              </Link>
+              ) : (
+                <Link href={profile.href}>
+                  <Stack direction="row" spacing={2}>
+                    <Box
+                      width="45px"
+                      height="45px"
+                      bgcolor="primary.light"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink="0"
+                    >
+                      <Avatar
+                        src={profile.icon}
+                        alt={profile.icon}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 0,
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={600}
+                        color="textPrimary"
+                        className="text-hover"
+                        noWrap
+                        sx={{
+                          width: "240px",
+                        }}
+                      >
+                        {profile.title}
+                      </Typography>
+                      <Typography
+                        color="textSecondary"
+                        variant="subtitle2"
+                        sx={{
+                          width: "240px",
+                        }}
+                        noWrap
+                      >
+                        {profile.subtitle}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Link>
+              )}
             </Box>
           </Box>
         ))}
@@ -193,6 +328,83 @@ const Profile = () => {
           </Button>
         </Box>
       </Menu>
+
+      {/* Change Password Dialog */}
+      <Dialog
+        open={changePasswordModalOpen}
+        onClose={handleChangePasswordClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmitChangePassword)}
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          >
+            <Controller
+              name="currentPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Current Password"
+                  type="password"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.currentPassword}
+                  helperText={errors.currentPassword?.message}
+                />
+              )}
+            />
+            <Controller
+              name="newPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="New Password"
+                  type="password"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.newPassword}
+                  helperText={errors.newPassword?.message}
+                />
+              )}
+            />
+            <Controller
+              name="confirmPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                />
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleChangePasswordClose} disabled={changing}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmitChangePassword)}
+            color="primary"
+            variant="contained"
+            disabled={changing}
+            startIcon={changing ? <CircularProgress size={16} /> : null}
+          >
+            {changing ? "Changing..." : "Change Password"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -61,8 +61,8 @@ interface ProfileType {
 const profile: ProfileType[] = [
   {
     href: "/",
-    title: "My Profile",
-    subtitle: "Account Settings",
+    title: "Change Password",
+    subtitle: "Change your password",
     icon: "/images/svgs/icon-account.svg",
   },
   // {

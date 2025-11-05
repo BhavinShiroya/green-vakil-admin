@@ -13,6 +13,8 @@ import { CustomizerContext } from "@/app/context/customizerContext";
 import { useAuth } from "@/app/context/authContext";
 import config from "@/app/context/config";
 import { CircularProgress } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MainWrapper = styled("div")(() => ({
   display: "flex",
@@ -115,6 +117,19 @@ export default function RootLayout({
           {/* ------------------------------------------- */}
         </Container>
         <Customizer />
+        {/* Global Toast Container */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </PageWrapper>
     </MainWrapper>
   );
