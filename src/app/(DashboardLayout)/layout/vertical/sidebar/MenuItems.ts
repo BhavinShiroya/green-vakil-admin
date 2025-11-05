@@ -98,6 +98,14 @@ const Menuitems: MenuitemsType[] = [
     chipColor: "secondary",
     roles: ["admin"],
   },
+  {
+    id: uniqueId(),
+    title: "Attorneys",
+    icon: IconUserCircle,
+    href: "/attorneys",
+    chipColor: "secondary",
+    roles: ["admin"],
+  },
   // {
   //   navlabel: true,
   //   subheader: "Other",
