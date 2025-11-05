@@ -243,10 +243,6 @@ const Articles = () => {
       `${baseUrl}/static/uploads/${filePath}`,
       filePath, // Try the filePath as-is
     ];
-
-    console.log("File path:", filePath);
-    console.log("Possible URLs:", possibleUrls);
-
     // Return the first URL for now, we'll add fallback logic
     return possibleUrls[0];
   };

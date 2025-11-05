@@ -164,7 +164,7 @@ const Menuitems: MenuitemsType[] = [
     icon: IconNotes,
     href: "/articles",
     // disabled: true,
-    roles: ["admin", "attorney"],
+    roles: ["admin", "editor"],
   },
   {
     id: uniqueId(),

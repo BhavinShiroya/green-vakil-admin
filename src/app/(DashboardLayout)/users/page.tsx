@@ -643,8 +643,7 @@ const Users = () => {
               variant="outlined"
             >
               <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="attorney">Attorney</MenuItem>
-              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="editor">Editor</MenuItem>
             </TextField>
           </Box>
         </DialogContent>
