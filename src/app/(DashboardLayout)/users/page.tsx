@@ -25,8 +25,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
@@ -158,7 +156,6 @@ const Users = () => {
     name: "",
     email: "",
     role: "",
-    isEmailVerified: false,
   });
 
   const fetchUsers = async (
@@ -291,7 +288,6 @@ const Users = () => {
       name: user.name,
       email: user.email,
       role: user.role,
-      isEmailVerified: user.isEmailVerified,
     });
     setEditModalOpen(true);
   };
@@ -303,13 +299,6 @@ const Users = () => {
     setEditFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEditFormData((prev) => ({
-      ...prev,
-      isEmailVerified: event.target.checked,
     }));
   };
 
@@ -348,7 +337,6 @@ const Users = () => {
       name: "",
       email: "",
       role: "",
-      isEmailVerified: false,
     });
   };
 
@@ -658,15 +646,6 @@ const Users = () => {
               <MenuItem value="attorney">Attorney</MenuItem>
               <MenuItem value="user">User</MenuItem>
             </TextField>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={editFormData.isEmailVerified}
-                  onChange={handleCheckboxChange}
-                />
-              }
-              label="Email Verified"
-            />
           </Box>
         </DialogContent>
         <DialogActions>
