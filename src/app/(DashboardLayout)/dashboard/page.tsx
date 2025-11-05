@@ -145,10 +145,6 @@ export default function Dashboard() {
             </Grid>
           )}
         </Box>
-
-        <DashboardCard title="Dashboard">
-          <Typography>This is a dashboard page</Typography>
-        </DashboardCard>
       </PageContainer>
     </RoleGuard>
   );
