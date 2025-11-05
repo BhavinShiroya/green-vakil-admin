@@ -24,6 +24,7 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import { Delete as DeleteIcon } from "@mui/icons-material";
 
 import ParentCard from "@/app/components/shared/ParentCard";
 import { Stack } from "@mui/system";
@@ -256,6 +257,9 @@ const Contact = () => {
                   <TableCell sx={{ width: "12%" }}>
                     <Typography variant="h6">Date / time</Typography>
                   </TableCell>
+                  <TableCell sx={{ width: "8%", textAlign: "center" }}>
+                    <Typography variant="h6">Actions</Typography>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -392,6 +396,22 @@ const Contact = () => {
                         {formatDate(contact.createdAt)}
                       </Typography>
                     </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Tooltip title="Delete client" arrow placement="top">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            color: "error.main",
+                            "&:hover": {
+                              backgroundColor: "error.dark",
+                              color: "white",
+                            },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -399,7 +419,7 @@ const Contact = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={6}
+                    colSpan={8}
                     count={totalContacts}
                     rowsPerPage={rowsPerPage}
                     page={page}

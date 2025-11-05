@@ -20,12 +20,22 @@ import {
   Tooltip,
   TextField,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import ParentCard from "@/app/components/shared/ParentCard";
 import { Stack } from "@mui/system";
@@ -135,6 +145,22 @@ const Users = () => {
   // Role filter state
   const [roleFilter, setRoleFilter] = useState("");
 
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    email: "",
+    role: "",
+    isEmailVerified: false,
+  });
+
   const fetchUsers = async (
     currentPage: number,
     limit: number,
@@ -222,6 +248,110 @@ const Users = () => {
     });
   };
 
+  // Handle delete user
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setDeleting(true);
+      await apiClient.delete(`/users/${userToDelete.id}`);
+
+      // Remove the user from the local state
+      setUsers((prev) => prev.filter((user) => user.id !== userToDelete.id));
+      setTotalUsers((prev) => prev - 1);
+
+      // Close modal
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
+
+      // Show success toast
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setUserToDelete(null);
+  };
+
+  // Handle edit user
+  const handleEditClick = (user: User) => {
+    setUserToEdit(user);
+    setEditFormData({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isEmailVerified: user.isEmailVerified,
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEditFormChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEditFormData((prev) => ({
+      ...prev,
+      isEmailVerified: event.target.checked,
+    }));
+  };
+
+  const handleEditConfirm = async () => {
+    if (!userToEdit) return;
+
+    try {
+      setEditing(true);
+      await apiClient.patch(`/users/${userToEdit.id}`, editFormData);
+
+      // Update the user in the local state
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userToEdit.id ? { ...user, ...editFormData } : user
+        )
+      );
+
+      // Close modal
+      setEditModalOpen(false);
+      setUserToEdit(null);
+
+      // Show success toast
+      toast.success("User updated successfully!");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user. Please try again.");
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditModalOpen(false);
+    setUserToEdit(null);
+    setEditFormData({
+      name: "",
+      email: "",
+      role: "",
+      isEmailVerified: false,
+    });
+  };
+
   return (
     <RoleGuard allowedRoles={["admin"]}>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -287,6 +417,9 @@ const Users = () => {
                   </TableCell>
                   <TableCell sx={{ width: "20%" }}>
                     <Typography variant="h6">Created Date</Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "10%", textAlign: "center" }}>
+                    <Typography variant="h6">Actions</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -383,6 +516,46 @@ const Users = () => {
                         </Typography>
                       </Tooltip>
                     </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Tooltip title="Edit user" arrow placement="top">
+                          <IconButton
+                            onClick={() => handleEditClick(user)}
+                            size="small"
+                            sx={{
+                              color: "primary.main",
+                              "&:hover": {
+                                backgroundColor: "primary.dark",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete user" arrow placement="top">
+                          <IconButton
+                            onClick={() => handleDeleteClick(user)}
+                            size="small"
+                            sx={{
+                              color: "error.main",
+                              "&:hover": {
+                                backgroundColor: "error.dark",
+                                color: "white",
+                              },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -390,7 +563,7 @@ const Users = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={5}
+                    colSpan={6}
                     count={totalUsers}
                     rowsPerPage={rowsPerPage}
                     page={page}
@@ -409,6 +582,122 @@ const Users = () => {
           </TableContainer>
         )}
       </BlankCard>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete the user "
+            {userToDelete?.name || "Untitled"}"?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            startIcon={
+              deleting ? <CircularProgress size={16} /> : <DeleteIcon />
+            }
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog
+        open={editModalOpen}
+        onClose={handleEditCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <TextField
+              label="Name"
+              name="name"
+              value={editFormData.name}
+              onChange={handleEditFormChange}
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={editFormData.email}
+              onChange={handleEditFormChange}
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              label="Role"
+              name="role"
+              value={editFormData.role}
+              onChange={handleEditFormChange}
+              select
+              fullWidth
+              variant="outlined"
+            >
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="attorney">Attorney</MenuItem>
+              <MenuItem value="user">User</MenuItem>
+            </TextField>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editFormData.isEmailVerified}
+                  onChange={handleCheckboxChange}
+                />
+              }
+              label="Email Verified"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditCancel} disabled={editing}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEditConfirm}
+            color="primary"
+            variant="contained"
+            disabled={editing}
+            startIcon={editing ? <CircularProgress size={16} /> : <EditIcon />}
+          >
+            {editing ? "Updating..." : "Update"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </RoleGuard>
   );
 };
