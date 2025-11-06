@@ -31,7 +31,11 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Add as AddIcon,
+} from "@mui/icons-material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -157,6 +161,18 @@ const Users = () => {
     email: "",
     role: "",
   });
+
+  // Add user modal state
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+  });
+  const [passwordError, setPasswordError] = useState("");
 
   const fetchUsers = async (
     currentPage: number,
@@ -340,6 +356,119 @@ const Users = () => {
     });
   };
 
+  // Handle add user
+  const handleAddClick = () => {
+    setAddFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "",
+    });
+    setPasswordError("");
+    setAddModalOpen(true);
+  };
+
+  const handleAddFormChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setAddFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: value,
+      };
+
+      // Validate password match in real-time
+      if (name === "password" || name === "confirmPassword") {
+        if (
+          updated.confirmPassword &&
+          updated.password !== updated.confirmPassword
+        ) {
+          setPasswordError("Passwords do not match");
+        } else {
+          setPasswordError("");
+        }
+      }
+
+      return updated;
+    });
+  };
+
+  const handleAddConfirm = async () => {
+    // Validate form
+    if (!addFormData.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    if (!addFormData.email.trim()) {
+      toast.error("Email is required");
+      return;
+    }
+    if (!addFormData.password.trim()) {
+      toast.error("Password is required");
+      return;
+    }
+    if (!addFormData.confirmPassword.trim()) {
+      toast.error("Please confirm your password");
+      return;
+    }
+    if (addFormData.password !== addFormData.confirmPassword) {
+      setPasswordError("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (!addFormData.role.trim()) {
+      toast.error("Role is required");
+      return;
+    }
+
+    try {
+      setAdding(true);
+      // Prepare payload without confirmPassword
+      const { confirmPassword, ...userPayload } = addFormData;
+      await apiClient.post("/users", userPayload);
+
+      // Close modal
+      setAddModalOpen(false);
+      setAddFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "",
+      });
+      setPasswordError("");
+
+      // Refresh users list
+      await fetchUsers(page, rowsPerPage, roleFilter);
+
+      // Show success toast
+      toast.success("User created successfully!");
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create user. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleAddCancel = () => {
+    setAddModalOpen(false);
+    setAddFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "",
+    });
+    setPasswordError("");
+  };
+
   return (
     <RoleGuard allowedRoles={["admin"]}>
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
@@ -361,19 +490,34 @@ const Users = () => {
       {/* Role Filter */}
       <BlankCard>
         <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider" }}>
-          <TextField
-            label="Filter by Role"
-            variant="outlined"
-            size="small"
-            select
-            value={roleFilter}
-            onChange={handleRoleFilterChange}
-            sx={{ minWidth: 200 }}
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
           >
-            <MenuItem value="">All Roles</MenuItem>
-            <MenuItem value="admin">Admin</MenuItem>
-            <MenuItem value="editor">Editor</MenuItem>
-          </TextField>
+            <TextField
+              label="Filter by Role"
+              variant="outlined"
+              size="small"
+              select
+              value={roleFilter}
+              onChange={handleRoleFilterChange}
+              sx={{ minWidth: 200 }}
+            >
+              <MenuItem value="">All Roles</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="editor">Editor</MenuItem>
+            </TextField>
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddClick}
+            >
+              Add User
+            </Button>
+          </Stack>
         </Box>
 
         {loading ? (
@@ -659,6 +803,88 @@ const Users = () => {
             startIcon={editing ? <CircularProgress size={16} /> : <EditIcon />}
           >
             {editing ? "Updating..." : "Update"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog
+        open={addModalOpen}
+        onClose={handleAddCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add User</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <TextField
+              label="Name"
+              name="name"
+              value={addFormData.name}
+              onChange={handleAddFormChange}
+              fullWidth
+              variant="outlined"
+              required
+            />
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={addFormData.email}
+              onChange={handleAddFormChange}
+              fullWidth
+              variant="outlined"
+              required
+            />
+            <TextField
+              label="Password"
+              name="password"
+              type="password"
+              value={addFormData.password}
+              onChange={handleAddFormChange}
+              fullWidth
+              variant="outlined"
+              required
+            />
+            <TextField
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={addFormData.confirmPassword}
+              onChange={handleAddFormChange}
+              fullWidth
+              variant="outlined"
+              required
+              error={!!passwordError}
+              helperText={passwordError}
+            />
+            <TextField
+              label="Role"
+              name="role"
+              value={addFormData.role}
+              onChange={handleAddFormChange}
+              select
+              fullWidth
+              variant="outlined"
+              required
+            >
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="editor">Editor</MenuItem>
+            </TextField>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddCancel} disabled={adding}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddConfirm}
+            color="primary"
+            variant="contained"
+            disabled={adding}
+            startIcon={adding ? <CircularProgress size={16} /> : <AddIcon />}
+          >
+            {adding ? "Creating..." : "Create User"}
           </Button>
         </DialogActions>
       </Dialog>
