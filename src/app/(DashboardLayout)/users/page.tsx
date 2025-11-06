@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import { useTheme } from "@mui/material/styles";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import {
   Typography,
   TableHead,
@@ -165,14 +168,47 @@ const Users = () => {
   // Add user modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [addFormData, setAddFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "",
+
+  // Validation schema for add user form
+  const addUserSchema = yup.object().shape({
+    name: yup.string().required("Name is required"),
+    email: yup
+      .string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: yup
+      .string()
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      ),
+    confirmPassword: yup
+      .string()
+      .required("Please confirm your password")
+      .oneOf([yup.ref("password")], "Passwords must match"),
+    role: yup.string().required("Role is required"),
   });
-  const [passwordError, setPasswordError] = useState("");
+
+  // React Hook Form setup for add user
+  const {
+    control: addControl,
+    handleSubmit: handleAddSubmit,
+    formState: { errors: addErrors },
+    reset: addReset,
+  } = useForm({
+    resolver: yupResolver(addUserSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "",
+    },
+  });
 
   const fetchUsers = async (
     currentPage: number,
@@ -358,90 +394,26 @@ const Users = () => {
 
   // Handle add user
   const handleAddClick = () => {
-    setAddFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      role: "",
-    });
-    setPasswordError("");
     setAddModalOpen(true);
   };
 
-  const handleAddFormChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setAddFormData((prev) => {
-      const updated = {
-        ...prev,
-        [name]: value,
-      };
-
-      // Validate password match in real-time
-      if (name === "password" || name === "confirmPassword") {
-        if (
-          updated.confirmPassword &&
-          updated.password !== updated.confirmPassword
-        ) {
-          setPasswordError("Passwords do not match");
-        } else {
-          setPasswordError("");
-        }
-      }
-
-      return updated;
-    });
+  const handleAddClose = () => {
+    setAddModalOpen(false);
+    addReset();
   };
 
-  const handleAddConfirm = async () => {
-    // Validate form
-    if (!addFormData.name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-    if (!addFormData.email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!addFormData.password.trim()) {
-      toast.error("Password is required");
-      return;
-    }
-    if (!addFormData.confirmPassword.trim()) {
-      toast.error("Please confirm your password");
-      return;
-    }
-    if (addFormData.password !== addFormData.confirmPassword) {
-      setPasswordError("Passwords do not match");
-      toast.error("Passwords do not match");
-      return;
-    }
-    if (!addFormData.role.trim()) {
-      toast.error("Role is required");
-      return;
-    }
-
+  const onSubmitAddUser = async (data: any) => {
     try {
       setAdding(true);
       // Prepare payload without confirmPassword
-      const { confirmPassword, ...userPayload } = addFormData;
+      const { confirmPassword, ...userPayload } = data;
       await apiClient.post("/users", userPayload);
-
-      // Close modal
-      setAddModalOpen(false);
-      setAddFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        role: "",
-      });
-      setPasswordError("");
 
       // Refresh users list
       await fetchUsers(page, rowsPerPage, roleFilter);
+
+      // Close modal and reset form
+      handleAddClose();
 
       // Show success toast
       toast.success("User created successfully!");
@@ -455,18 +427,6 @@ const Users = () => {
     } finally {
       setAdding(false);
     }
-  };
-
-  const handleAddCancel = () => {
-    setAddModalOpen(false);
-    setAddFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      role: "",
-    });
-    setPasswordError("");
   };
 
   return (
@@ -810,83 +770,110 @@ const Users = () => {
       {/* Add User Dialog */}
       <Dialog
         open={addModalOpen}
-        onClose={handleAddCancel}
+        onClose={handleAddClose}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Add User</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField
-              label="Name"
-              name="name"
-              value={addFormData.name}
-              onChange={handleAddFormChange}
-              fullWidth
-              variant="outlined"
-              required
-            />
-            <TextField
-              label="Email"
-              name="email"
-              type="email"
-              value={addFormData.email}
-              onChange={handleAddFormChange}
-              fullWidth
-              variant="outlined"
-              required
-            />
-            <TextField
-              label="Password"
-              name="password"
-              type="password"
-              value={addFormData.password}
-              onChange={handleAddFormChange}
-              fullWidth
-              variant="outlined"
-              required
-            />
-            <TextField
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={addFormData.confirmPassword}
-              onChange={handleAddFormChange}
-              fullWidth
-              variant="outlined"
-              required
-              error={!!passwordError}
-              helperText={passwordError}
-            />
-            <TextField
-              label="Role"
-              name="role"
-              value={addFormData.role}
-              onChange={handleAddFormChange}
-              select
-              fullWidth
-              variant="outlined"
-              required
+        <form onSubmit={handleAddSubmit(onSubmitAddUser)}>
+          <DialogTitle>Add User</DialogTitle>
+          <DialogContent>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
             >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="editor">Editor</MenuItem>
-            </TextField>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAddCancel} disabled={adding}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddConfirm}
-            color="primary"
-            variant="contained"
-            disabled={adding}
-            startIcon={adding ? <CircularProgress size={16} /> : <AddIcon />}
-          >
-            {adding ? "Creating..." : "Create User"}
-          </Button>
-        </DialogActions>
+              <Controller
+                name="name"
+                control={addControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Name"
+                    fullWidth
+                    variant="outlined"
+                    error={!!addErrors.name}
+                    helperText={addErrors.name?.message}
+                  />
+                )}
+              />
+              <Controller
+                name="email"
+                control={addControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    variant="outlined"
+                    error={!!addErrors.email}
+                    helperText={addErrors.email?.message}
+                  />
+                )}
+              />
+              <Controller
+                name="password"
+                control={addControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Password"
+                    type="password"
+                    fullWidth
+                    variant="outlined"
+                    error={!!addErrors.password}
+                    helperText={addErrors.password?.message}
+                  />
+                )}
+              />
+              <Controller
+                name="confirmPassword"
+                control={addControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Confirm Password"
+                    type="password"
+                    fullWidth
+                    variant="outlined"
+                    error={!!addErrors.confirmPassword}
+                    helperText={addErrors.confirmPassword?.message}
+                  />
+                )}
+              />
+              <Controller
+                name="role"
+                control={addControl}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Role"
+                    select
+                    fullWidth
+                    variant="outlined"
+                    error={!!addErrors.role}
+                    helperText={addErrors.role?.message}
+                  >
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="editor">Editor</MenuItem>
+                  </TextField>
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button type="button" onClick={handleAddClose} disabled={adding}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              color="primary"
+              variant="contained"
+              disabled={adding}
+              startIcon={adding ? <CircularProgress size={16} /> : <AddIcon />}
+            >
+              {adding ? "Creating..." : "Create User"}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
       {/* Toast Container */}
