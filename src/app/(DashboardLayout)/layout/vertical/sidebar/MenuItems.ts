@@ -81,9 +81,9 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: "Clients",
+    title: "Queries",
     icon: IconAward,
-    href: "/clients",
+    href: "/queries",
     // chip: "New",
     chipColor: "secondary",
     roles: ["admin"],

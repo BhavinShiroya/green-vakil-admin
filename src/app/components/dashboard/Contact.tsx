@@ -266,7 +266,7 @@ const Contact = () => {
               letterSpacing: "-0.025em",
             }}
           >
-            Clients Management
+            Queries Management
           </Typography>
         </Box>
       </Box>

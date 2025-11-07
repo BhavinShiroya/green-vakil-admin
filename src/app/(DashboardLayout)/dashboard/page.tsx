@@ -66,7 +66,7 @@ export default function Dashboard() {
       textColor: "secondary.dark",
     },
     {
-      title: "Contacts",
+      title: "Queries",
       value: stats.contacts,
       bgColor: "success.light",
       textColor: "success.dark",
