@@ -621,21 +621,23 @@ const Users = () => {
                           justifyContent: "center",
                         }}
                       >
-                        <Tooltip title="Edit user" arrow placement="top">
-                          <IconButton
-                            onClick={() => handleEditClick(user)}
-                            size="small"
-                            sx={{
-                              color: "primary.main",
-                              "&:hover": {
-                                backgroundColor: "primary.dark",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {!isGreenwayLawyerEmail(user.email) && (
+                          <Tooltip title="Edit user" arrow placement="top">
+                            <IconButton
+                              onClick={() => handleEditClick(user)}
+                              size="small"
+                              sx={{
+                                color: "primary.main",
+                                "&:hover": {
+                                  backgroundColor: "primary.dark",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                         {!isGreenwayLawyerEmail(user.email) && (
                           <Tooltip title="Delete user" arrow placement="top">
                             <IconButton
