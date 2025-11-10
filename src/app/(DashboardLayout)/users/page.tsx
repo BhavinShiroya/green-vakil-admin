@@ -297,6 +297,11 @@ const Users = () => {
     });
   };
 
+  const isGreenwayLawyerEmail = (email: string) => {
+    const domain = email.split("@")[1];
+    return domain === "greenwaylawyer.com";
+  };
+
   // Handle delete user
   const handleDeleteClick = (user: User) => {
     setUserToDelete(user);
@@ -631,21 +636,23 @@ const Users = () => {
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete user" arrow placement="top">
-                          <IconButton
-                            onClick={() => handleDeleteClick(user)}
-                            size="small"
-                            sx={{
-                              color: "error.main",
-                              "&:hover": {
-                                backgroundColor: "error.dark",
-                                color: "white",
-                              },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {!isGreenwayLawyerEmail(user.email) && (
+                          <Tooltip title="Delete user" arrow placement="top">
+                            <IconButton
+                              onClick={() => handleDeleteClick(user)}
+                              size="small"
+                              sx={{
+                                color: "error.main",
+                                "&:hover": {
+                                  backgroundColor: "error.dark",
+                                  color: "white",
+                                },
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
