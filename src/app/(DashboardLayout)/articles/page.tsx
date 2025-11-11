@@ -419,7 +419,6 @@ const Articles = () => {
                 <MenuItem value="employment-&-labor-law">
                   Employment & Labor Law
                 </MenuItem>
-                <MenuItem value="not-sure-/-other">Not Sure / Other</MenuItem>
               </TextField>
 
               <TextField
