@@ -238,10 +238,10 @@ const Contact = () => {
       setContactToDelete(null);
 
       // Show success toast
-      toast.success("Client deleted successfully!");
+      toast.success("Query deleted successfully!");
     } catch (error) {
-      console.error("Error deleting client:", error);
-      toast.error("Failed to delete client. Please try again.");
+      console.error("Error deleting query:", error);
+      toast.error("Failed to delete query. Please try again.");
     } finally {
       setDeleting(false);
     }
@@ -447,7 +447,7 @@ const Contact = () => {
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <Tooltip title="Delete client" arrow placement="top">
+                      <Tooltip title="Delete query" arrow placement="top">
                         <IconButton
                           onClick={() => handleDeleteClick(contact)}
                           size="small"
@@ -497,10 +497,10 @@ const Contact = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Delete Client</DialogTitle>
+        <DialogTitle>Delete Query</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Are you sure you want to delete the client "
+            Are you sure you want to delete the query "
             {contactToDelete
               ? `${contactToDelete.firstName} ${contactToDelete.lastName}`
               : "Untitled"}
